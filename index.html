@@ -2,14 +2,17 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kitap Okuma Sayacı</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Kitap Okuma Sayacı | Mobil</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-
     <style>
-        /* ============================================================
-           RENKLER VE TEMA DEĞİŞKENLERİ
-        ============================================================ */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
         :root {
             --bg: #f8f7f4;
             --surface: #ffffff;
@@ -20,1105 +23,574 @@
             --accent-light: #e8f5e9;
             --accent2: #1b4332;
             --danger: #c0392b;
-            --radius: 12px;
-            --shadow: 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --radius: 16px;
+            --shadow: 0 4px 12px rgba(0,0,0,0.04);
         }
 
         body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            font-size: 14px;
+            font-size: 15px;
             min-height: 100vh;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
 
-        /* HEADER */
+        /* mobil header - daha kompakt ve sabit */
         .header {
             background: var(--accent2);
             color: white;
-            padding: 14px 24px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             position: sticky;
             top: 0;
             z-index: 100;
+            backdrop-filter: blur(0px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+        .header h1 { font-size: 1.25rem; font-weight: 600; letter-spacing: -0.3px; }
+        .header-date { font-size: 0.7rem; opacity: 0.85; font-weight: 450; }
 
-        .header h1 { font-size: 18px; font-weight: 600; }
-        .header-date { font-size: 12px; opacity: 0.8; }
-
-        /* LAYOUT */
+        /* mobil düzen: sidebar düşey değil, alt tab bar + içerik */
         .layout {
             display: flex;
-            height: calc(100vh - 52px);
+            flex-direction: column;
+            height: auto;
+            min-height: calc(100vh - 56px);
         }
 
-        /* SIDEBAR */
-        .sidebar {
-            width: 240px;
+        /* ana içerik alanı - padding mobil için uygun */
+        .content {
+            flex: 1;
+            padding: 18px 16px 30px 16px;
+            overflow-y: auto;
+        }
+
+        /* alt gezinme çubuğu (mobile tab bar) */
+        .bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
             background: var(--surface);
-            border-right: 1px solid var(--border);
+            backdrop-filter: blur(12px);
+            background: rgba(255,255,255,0.96);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px 16px 20px;
+            padding-bottom: max(2px, env(safe-area-inset-bottom));
+            z-index: 110;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.02);
+        }
+        .mobile-tab-btn {
+            background: transparent;
+            border: none;
             display: flex;
             flex-direction: column;
-            overflow-y: auto;
-            padding: 12px 0;
-        }
-
-        .sidebar-section { padding: 0 12px; margin-bottom: 8px; }
-
-        .sidebar-label {
-            font-size: 10px;
-            font-weight: 600;
-            text-transform: uppercase;
-            color: var(--muted);
-            letter-spacing: 0.5px;
-            padding: 8px 4px 4px;
-        }
-
-        .tab-btn {
-            width: 100%;
-            text-align: left;
-            padding: 8px 12px;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 13px;
-            color: var(--text);
-            display: flex;
             align-items: center;
-            gap: 10px;
-            transition: all 0.2s;
-            font-family: inherit;
-        }
-        .tab-btn:hover { background: var(--bg); }
-        .tab-btn.active { background: var(--accent-light); color: var(--accent2); font-weight: 600; }
-        .tab-icon { font-size: 16px; width: 24px; }
-
-        .book-item {
-            width: 100%;
-            text-align: left;
-            padding: 8px 12px;
-            background: transparent;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            gap: 4px;
             font-size: 12px;
-            color: var(--text);
-            transition: all 0.2s;
+            font-weight: 500;
+            color: var(--muted);
+            padding: 6px 12px;
+            border-radius: 30px;
+            transition: all 0.2s ease;
             font-family: inherit;
+            cursor: pointer;
         }
-        .book-item:hover { background: var(--bg); }
-        .book-item.active { background: var(--accent-light); color: var(--accent2); }
-
-        .book-thumb {
-            width: 32px;
-            height: 44px;
+        .mobile-tab-btn .tab-icon {
+            font-size: 22px;
+        }
+        .mobile-tab-btn.active {
+            color: var(--accent);
             background: var(--accent-light);
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            flex-shrink: 0;
-            overflow: hidden;
+            font-weight: 600;
         }
-        .book-thumb img { width: 100%; height: 100%; object-fit: cover; }
 
-        .book-info { flex: 1; min-width: 0; }
-        .book-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .book-progress { font-size: 10px; color: var(--muted); margin-top: 2px; }
+        /* kitaplar için yatay scroll mobilde? ama listede vertical liste kalır, sidebar mobilde kaybolur */
+        /* kitaplar listesini content içinde kart şeklinde gösteriyoruz */
+        .books-horizontal-scroll {
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scrollbar-width: thin;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+        }
+        .book-chip {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 40px;
+            padding: 8px 18px;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+            flex-shrink: 0;
+        }
+        .book-chip.active {
+            background: var(--accent-light);
+            border-color: var(--accent);
+            color: var(--accent2);
+        }
+        .book-chip .chip-progress {
+            font-size: 11px;
+            color: var(--muted);
+            margin-left: 6px;
+        }
 
-        /* PANEL */
-        .content { flex: 1; overflow-y: auto; padding: 24px 32px; }
-        .panel { display: none; }
-        .panel.active { display: block; animation: fadeIn 0.2s ease; }
-
+        /* ortak panel stilleri */
+        .panel {
+            display: none;
+            animation: fadeIn 0.2s ease;
+        }
+        .panel.active {
+            display: block;
+        }
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
+            from { opacity: 0; transform: translateY(6px); }
             to   { opacity: 1; transform: translateY(0); }
         }
 
-        .section-title { font-size: 22px; font-weight: 700; margin-bottom: 20px; color: var(--accent2); }
+        .section-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--accent2);
+            letter-spacing: -0.3px;
+        }
 
-        /* CARD */
         .card {
             background: var(--surface);
-            border: 1px solid var(--border);
             border-radius: var(--radius);
-            padding: 20px;
+            padding: 18px;
             margin-bottom: 20px;
             box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         .card-title {
             font-size: 13px;
             font-weight: 600;
             text-transform: uppercase;
             color: var(--muted);
-            letter-spacing: 0.5px;
+            letter-spacing: 0.4px;
             margin-bottom: 14px;
         }
 
-        /* FORM */
-        .form-group { margin-bottom: 14px; }
-        .form-group label { display: block; font-size: 12px; font-weight: 500; color: var(--muted); margin-bottom: 6px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { font-size: 13px; font-weight: 500; color: var(--muted); margin-bottom: 6px; display: block; }
 
         input, select, textarea {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 14px;
             border: 1px solid var(--border);
-            border-radius: 8px;
+            border-radius: 14px;
             background: var(--bg);
             font-family: inherit;
-            font-size: 13px;
+            font-size: 15px;
             transition: all 0.2s;
-            color: var(--text);
         }
-        input:focus, select:focus { outline: none; border-color: var(--accent); background: white; }
+        input:focus { outline: none; border-color: var(--accent); background: white; }
 
-        /* BUTTONS */
-        .btn { padding: 8px 18px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; font-family: inherit; }
-        .btn-primary { background: var(--accent); color: white; }
-        .btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
-        .btn-outline { background: transparent; border-color: var(--accent); color: var(--accent); }
-        .btn-outline:hover { background: var(--accent-light); }
-        .btn-sm { padding: 6px 12px; font-size: 12px; }
-        .btn-danger { background: var(--danger); color: white; }
-
-        /* LAYOUT helpers */
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-        .flex-row { display: flex; gap: 10px; align-items: center; }
-
-        /* METRIC */
-        .metric { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; text-align: center; }
-        .metric-val { font-size: 28px; font-weight: 700; color: var(--accent2); }
+        .btn {
+            padding: 10px 18px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+        .btn-primary { background: var(--accent); color: white; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .btn-primary:active { transform: scale(0.97); background: var(--accent2); }
+        .btn-outline { background: transparent; border: 1px solid var(--accent); color: var(--accent); }
+        .btn-sm { padding: 8px 14px; font-size: 13px; }
+        .flex-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+        .metric {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 14px 6px;
+            text-align: center;
+        }
+        .metric-val { font-size: 26px; font-weight: 800; color: var(--accent2); }
         .metric-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-        /* PROGRESS */
-        .progress-bar-wrap { background: var(--bg); border-radius: 20px; height: 8px; overflow: hidden; margin-top: 8px; }
-        .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 20px; transition: width 0.3s ease; }
+        .progress-bar-wrap { background: var(--bg); border-radius: 30px; height: 8px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 30px; transition: width 0.25s ease; }
 
-        /* BADGE */
-        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; }
         .badge-green  { background: var(--accent-light); color: var(--accent2); }
         .badge-orange { background: #fff3e0; color: #e67e22; }
         .badge-blue   { background: #e3f2fd; color: #1565c0; }
 
-        /* CALENDAR */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
         .cal-day-name { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 0; }
-        .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 8px; background: var(--bg); cursor: default; }
-        .cal-cell.has-read { background: var(--accent-light); color: var(--accent2); font-weight: 600; }
-        .cal-cell.today { border: 2px solid var(--accent); font-weight: 700; }
-        .cal-cell.empty { background: transparent; }
+        .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 13px; border-radius: 40px; background: var(--bg); cursor: default; }
+        .cal-cell.has-read { background: var(--accent-light); color: var(--accent2); font-weight: 700; }
+        .cal-cell.today { border: 2px solid var(--accent); font-weight: 800; }
 
-        /* LOADER */
-        .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
+        .edition-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--bg);
+            width: 100%;
+            text-align: left;
+            margin-bottom: 8px;
+        }
+        .edition-card.selected { border-color: var(--accent); background: var(--accent-light); }
+        .edition-cover { width: 44px; height: 60px; background: #e0e7e0; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .edition-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .finished-book { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); border-radius: 16px; margin-bottom: 8px; }
+
+        .chart-container { position: relative; height: 210px; width: 100%; margin-top: 10px; }
+        .loader { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* CHART */
-        .chart-container { position: relative; height: 220px; width: 100%; }
+        /* modal mobil uyum */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+        }
+        .modal-card {
+            background: var(--surface); border-radius: 28px; max-width: 94%; width: 100%; max-height: 85vh;
+            overflow-y: auto; padding: 22px; box-shadow: 0 20px 35px rgba(0,0,0,0.2);
+        }
+        .status-msg { font-size: 12px; padding: 6px 0; color: var(--muted); }
+        .status-msg.ok { color: var(--accent); }
 
-        /* PREVIEW */
-        .preview-container { display: flex; gap: 16px; margin-bottom: 12px; }
-        .preview-thumb { width: 60px; height: 80px; background: var(--accent-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 32px; overflow: hidden; flex-shrink: 0; }
-        .preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-info { flex: 1; }
-        .preview-title { font-size: 16px; font-weight: 700; }
-        .preview-author { font-size: 13px; color: var(--muted); margin-top: 4px; }
-        .preview-genre { font-size: 12px; margin-top: 6px; }
-        .preview-pages { font-size: 12px; color: var(--accent); margin-top: 4px; }
-        .preview-desc { font-size: 12px; color: var(--muted); line-height: 1.5; margin: 12px 0; padding: 10px; background: var(--bg); border-radius: 8px; }
-        .preview-actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-
-        /* STATUS */
-        .status-msg { font-size: 12px; padding: 6px 0; color: var(--muted); min-height: 24px; }
-        .status-msg.ok  { color: var(--accent); }
-        .status-msg.err { color: var(--danger); }
-
-        .finished-book { display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; background: var(--bg); border-radius: 8px; margin-bottom: 8px; border: 1px solid var(--border); }
-        .finished-book-info { display: flex; flex-direction: column; gap: 2px; }
-        .finished-book-pages { font-size: 11px; color: var(--muted); }
-
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg); }
-        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        /* mobil görünüm için kitap listesi yerine yatay değil, dikey kartlar */
+        .mobile-book-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 8px;
+            max-height: 260px;
+            overflow-y: auto;
+        }
+        .mobile-book-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .mobile-book-item.active { background: var(--accent-light); border-color: var(--accent); }
+        .book-thumb-mob { width: 44px; height: 58px; background: var(--accent-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 22px; overflow: hidden; }
+        .book-info-mob { flex: 1; }
+        .book-title-mob { font-weight: 600; font-size: 15px; }
+        .book-progress-mob { font-size: 12px; color: var(--muted); }
     </style>
 </head>
 <body>
 
-<!-- HEADER -->
 <div class="header">
-    <h1>Kitap Okuma Sayacı</h1>
+    <h1>📖 Kitap Sayacı</h1>
     <div id="header-date" class="header-date"></div>
 </div>
 
-<!-- ANA LAYOUT -->
 <div class="layout">
-
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-        <div class="sidebar-section">
-            <div class="sidebar-label">Genel</div>
-            <button class="tab-btn active" data-panel="panel-add">
-                <span class="tab-icon">➕</span> Yeni Kitap Ekle
-            </button>
-            <button class="tab-btn" data-panel="panel-profile">
-                <span class="tab-icon">👤</span> Profilim
-            </button>
-        </div>
-        <div class="sidebar-section">
-            <div class="sidebar-label">Kitaplarım</div>
-            <div id="sidebar-books-list"></div>
-        </div>
-    </div>
-
-    <!-- İÇERİK ALANI -->
-    <div class="content">
-
+    <div class="content" id="main-content">
         <!-- PANEL 1: Yeni Kitap Ekle -->
         <div id="panel-add" class="panel active">
-            <h2 class="section-title">➕ Yeni Kitap Başlat</h2>
-
+            <h2 class="section-title">➕ Yeni Kitap</h2>
             <div class="card">
-                <div class="card-title">📖 Kitap Adı ile Ara</div>
+                <div class="card-title">📖 Kitap ara</div>
                 <div class="form-group">
                     <label>Kitap Adı</label>
                     <div class="flex-row">
-                        <input type="text" id="new-book-title" placeholder="Örn: Suç ve Ceza, 1984, Kürk Mantolu Madonna">
-                        <button class="btn btn-primary btn-sm" id="search-btn">
-                            <span id="search-btn-txt">🔍 Ara</span>
-                            <span id="search-loader" class="loader" style="display:none"></span>
-                        </button>
+                        <input type="text" id="new-book-title" placeholder="Örn: Simyacı, 1984" style="flex:1">
+                        <button class="btn btn-primary btn-sm" id="search-btn"><span id="search-btn-txt">🔍 Ara</span><span id="search-loader" class="loader" style="display:none"></span></button>
                     </div>
                 </div>
                 <div id="search-status" class="status-msg"></div>
-
-                <div id="book-preview" style="display:none">
-                    <div class="preview-container">
-                        <div class="preview-thumb" id="preview-thumb">📖</div>
-                        <div class="preview-info">
-                            <div class="preview-title" id="preview-title"></div>
-                            <div class="preview-author" id="preview-author"></div>
-                            <div class="preview-genre" id="preview-genre"></div>
-                            <div class="preview-pages" id="preview-pages"></div>
-                        </div>
+                <div id="edition-section" style="display:none">
+                    <div class="card-title">📚 Baskı seç</div>
+                    <div id="edition-list" class="edition-list"></div>
+                    <div class="edition-divider" style="margin:12px 0;text-align:center">veya</div>
+                    <div class="manual-edition-box" style="background:var(--bg);padding:12px;border-radius:16px">
+                        <label>✏️ Sayfa sayısını kendim gir</label>
+                        <div class="flex-row"><input type="number" id="manual-page-override" placeholder="Sayfa sayısı" style="flex:1"></div>
                     </div>
-                    <div class="preview-desc" id="preview-desc"></div>
-                    <div class="preview-actions">
-                        <button class="btn btn-primary" id="confirm-add-btn">✔ Bu Kitabı Ekle</button>
-                        <button class="btn btn-outline" id="manual-add-btn">✏️ El ile Düzenle</button>
+                    <div style="display:flex;gap:10px;margin-top:16px">
+                        <button class="btn btn-primary" id="confirm-edition-btn">Devam et</button>
+                        <button class="btn btn-outline btn-sm" id="cancel-edition-btn">İptal</button>
                     </div>
                 </div>
-
-                <div id="manual-form" style="display:none; margin-top:14px">
-                    <div class="grid-2" style="margin-bottom:10px">
-                        <input type="text" id="manual-author" placeholder="Yazar adı">
-                        <input type="number" id="manual-pages" placeholder="Sayfa sayısı" min="1">
-                    </div>
-                    <input type="text" id="manual-genre" placeholder="Tür (Roman, Bilim Kurgu...)" style="margin-bottom:10px">
-                    <button class="btn btn-primary" id="manual-confirm-btn">📚 Kitabı Ekle</button>
-                </div>
+            </div>
+            <div class="card">
+                <div class="card-title">📚 Kitaplarım</div>
+                <div id="sidebar-books-list-mobile" class="mobile-book-list"></div>
             </div>
         </div>
 
         <!-- PANEL 2: Profil -->
         <div id="panel-profile" class="panel">
             <h2 class="section-title">👤 Profilim</h2>
-
-            <div class="grid-3" style="margin-bottom:20px">
-                <div class="metric">
-                    <div class="metric-val" id="stat-total-books">0</div>
-                    <div class="metric-lbl">Aktif Kitap</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-val" id="stat-finished">0</div>
-                    <div class="metric-lbl">Bitirilen Kitap</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-val" id="stat-total-pages">0</div>
-                    <div class="metric-lbl">Toplam Okunan Sayfa</div>
-                </div>
+            <div class="grid-3">
+                <div class="metric"><div class="metric-val" id="stat-total-books">0</div><div class="metric-lbl">Aktif Kitap</div></div>
+                <div class="metric"><div class="metric-val" id="stat-finished">0</div><div class="metric-lbl">Bitirilen</div></div>
+                <div class="metric"><div class="metric-val" id="stat-total-pages">0</div><div class="metric-lbl">Okunan Sayfa</div></div>
             </div>
-
-            <div class="card">
-                <div class="card-title">📊 Haftalık Ortalama (Sayfa/Gün)</div>
-                <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
-            </div>
-
-            <div class="card">
-                <div class="card-title">📈 Aylık Ortalama (Sayfa/Gün)</div>
-                <div class="chart-container"><canvas id="chart-monthly"></canvas></div>
-            </div>
-
+            <div class="card"><div class="card-title">📊 Haftalık Ortalama (sayfa/gün)</div><div class="chart-container"><canvas id="chart-weekly"></canvas></div></div>
+            <div class="card"><div class="card-title">📈 Aylık Ortalama</div><div class="chart-container"><canvas id="chart-monthly"></canvas></div></div>
             <div class="card">
                 <div class="card-title">✅ Bitirilen Kitaplar</div>
-                <div class="flex-row" style="margin-bottom:14px">
-                    <input type="text" id="finished-input" placeholder="Kitap adı... (sayfa sayısı otomatik eklenir)" style="flex:1">
-                    <button class="btn btn-primary btn-sm" id="add-finished-btn">
-                        <span id="fin-btn-txt">+ Ekle</span>
-                        <span id="fin-loader" class="loader" style="display:none"></span>
-                    </button>
-                </div>
+                <div class="flex-row" style="margin-bottom:12px"><input id="finished-input" placeholder="Kitap adı ara..." style="flex:1"><button class="btn btn-primary btn-sm" id="add-finished-btn">+ Ekle</button></div>
                 <div id="fin-status" class="status-msg"></div>
                 <div id="finished-list"></div>
             </div>
         </div>
 
-        <!-- PANEL 3: Kitap Detay (dinamik) -->
+        <!-- PANEL 3: Kitap Detay -->
         <div id="panel-book-detail" class="panel"></div>
-
     </div>
 </div>
 
+<div class="bottom-tab-bar">
+    <button class="mobile-tab-btn active" data-panel="panel-add"><span class="tab-icon">➕</span><span>Yeni</span></button>
+    <button class="mobile-tab-btn" data-panel="panel-profile"><span class="tab-icon">👤</span><span>Profil</span></button>
+    <button class="mobile-tab-btn" data-panel="panel-book-detail" id="book-detail-tab" style="display:none"><span class="tab-icon">📘</span><span>Kitap</span></button>
+</div>
+
 <script>
-    /* ============================================================
-       VERİ KATMANI - localStorage
-    ============================================================ */
-    let STATE = loadState();
+// TAM VERİ KATMANI
+let STATE = (() => {try{ let raw=localStorage.getItem('bookTracker_v3'); return raw?JSON.parse(raw):{books:[],finishedBooks:[]}; }catch(e){ return {books:[],finishedBooks:[]}; }})();
+function saveState() { localStorage.setItem('bookTracker_v3', JSON.stringify(STATE)); }
+function genId(){ return 'book_'+Date.now()+'_'+Math.random().toString(36).substr(2,6); }
+function todayStr(){ return new Date().toISOString().split('T')[0]; }
+function escapeHtml(str){ if(!str)return ''; return String(str).replace(/[&<>]/g, function(m){if(m==='&')return '&amp;';if(m==='<')return '&lt;';if(m==='>')return '&gt;';return m;}); }
+function getWeekNumber(dateStr){ let d=new Date(dateStr); let jan4=new Date(d.getFullYear(),0,4); let start=new Date(jan4); start.setDate(jan4.getDate()-((jan4.getDay()||7)-1)); let week=Math.floor((d-start)/(7*86400000))+1; return `${d.getFullYear()}-W${String(week).padStart(2,'0')}`; }
+function getMonthKey(ds){ return ds.slice(0,7); }
 
-    function loadState() {
-        try {
-            const raw = localStorage.getItem('bookTracker_v2');
-            if (!raw) return { books: [], finishedBooks: [] };
-            return JSON.parse(raw);
-        } catch (e) {
-            return { books: [], finishedBooks: [] };
-        }
-    }
-
-    function saveState() {
-        localStorage.setItem('bookTracker_v2', JSON.stringify(STATE));
-    }
-
-    function freshState() {
-        return { books: [], finishedBooks: [] };
-    }
-
-    /* ============================================================
-       YARDIMCI FONKSİYONLAR
-    ============================================================ */
-    function genId() {
-        return 'book_' + Date.now() + '_' + Math.random().toString(36).substr(2, 8);
-    }
-
-    function todayStr() {
-        return new Date().toISOString().split('T')[0];
-    }
-
-    function getWeekNumber(dateStr) {
-        const d = new Date(dateStr);
-        const jan4 = new Date(d.getFullYear(), 0, 4);
-        const startOfWeek1 = new Date(jan4);
-        startOfWeek1.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1);
-        const week = Math.floor((d - startOfWeek1) / (7 * 86400000)) + 1;
-        return `${d.getFullYear()}-W${String(week).padStart(2, '0')}`;
-    }
-
-    function getMonthKey(dateStr) {
-        return dateStr.slice(0, 7);
-    }
-
-    function showStatus(id, msg, type) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        el.textContent = msg;
-        el.className = 'status-msg' + (type ? ' ' + type : '');
-    }
-
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-    }
-
-    /* ============================================================
-       GOOGLE BOOKS API - ORTALAMA SAYFA SAYISI
-    ============================================================ */
-    function averagePageCount(items) {
-        const pageCounts = items.map(item => item.volumeInfo?.pageCount).filter(p => p && p > 0);
-        if (pageCounts.length === 0) return 0;
-        const total = pageCounts.reduce((sum, p) => sum + p, 0);
-        return Math.round(total / pageCounts.length);
-    }
-
-    let previewBookData = null;
-
-    async function searchBook() {
-        const title = document.getElementById('new-book-title').value.trim();
-        if (!title) {
-            showStatus('search-status', '⚠ Kitap adı girin!', 'err');
-            return;
-        }
-
-        document.getElementById('search-btn-txt').style.display = 'none';
-        document.getElementById('search-loader').style.display = 'inline-block';
-        document.getElementById('search-btn').disabled = true;
-        document.getElementById('book-preview').style.display = 'none';
-        showStatus('search-status', 'Google Books\'ta aranıyor...', '');
-
-        try {
-            const url = `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(title)}&maxResults=5`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
-            const data = await response.json();
-
-            if (!data.items || data.items.length === 0) {
-                showStatus('search-status', '⚠ Kitap bulunamadı. El ile ekleyebilirsiniz.', 'err');
-                document.getElementById('manual-form').style.display = 'block';
-                return;
-            }
-
-            const bestItem = data.items.find(i => i.volumeInfo?.pageCount > 0) || data.items[0];
-            const info = bestItem.volumeInfo;
-            const avgPages = averagePageCount(data.items);
-            const countedEditions = data.items.filter(i => i.volumeInfo?.pageCount > 0).length;
-
-            previewBookData = {
-                title: info.title || title,
-                author: (info.authors && info.authors[0]) || 'Bilinmiyor',
-                pages: avgPages,
-                editionCount: countedEditions,
-                genre: (info.categories && info.categories[0]) || 'Belirtilmemiş',
-                description: info.description ? info.description.slice(0, 200) + (info.description.length > 200 ? '...' : '') : 'Açıklama mevcut değil.',
-                coverUrl: info.imageLinks?.thumbnail?.replace('http://', 'https://') || '',
-            };
-
-            const thumbEl = document.getElementById('preview-thumb');
-            if (previewBookData.coverUrl) {
-                thumbEl.innerHTML = `<img src="${previewBookData.coverUrl}" alt="Kapak" onerror="this.parentElement.innerHTML='📖'">`;
-            } else {
-                thumbEl.innerHTML = '📖';
-            }
-
-            document.getElementById('preview-title').textContent = previewBookData.title;
-            document.getElementById('preview-author').textContent = '✍️ ' + previewBookData.author;
-            document.getElementById('preview-genre').textContent = '🏷️ ' + previewBookData.genre;
-            document.getElementById('preview-pages').textContent = previewBookData.pages ? `📄 ~${previewBookData.pages} sayfa (${previewBookData.editionCount} baskı ortalaması)` : '📄 Sayfa sayısı bulunamadı';
-            document.getElementById('preview-desc').textContent = previewBookData.description;
-
-            document.getElementById('manual-author').value = previewBookData.author;
-            document.getElementById('manual-pages').value = previewBookData.pages || '';
-            document.getElementById('manual-genre').value = previewBookData.genre;
-
-            document.getElementById('book-preview').style.display = 'block';
-            showStatus('search-status', '✓ Kitap bulundu!', 'ok');
-
-        } catch (err) {
-            showStatus('search-status', '⚠ Hata: ' + err.message, 'err');
-            document.getElementById('manual-form').style.display = 'block';
-        } finally {
-            document.getElementById('search-btn-txt').style.display = 'inline';
-            document.getElementById('search-loader').style.display = 'none';
-            document.getElementById('search-btn').disabled = false;
-        }
-    }
-
-    document.getElementById('search-btn').addEventListener('click', searchBook);
-    document.getElementById('new-book-title').addEventListener('keydown', e => { if (e.key === 'Enter') searchBook(); });
-
-    /* ============================================================
-       API'DEN SAYFA SAYISI ÇEK (BİTİRİLEN KİTAP İÇİN)
-    ============================================================ */
-    async function fetchPageCountForFinished(title) {
-        try {
-            const url = `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(title)}&maxResults=5`;
-            const response = await fetch(url);
-            if (!response.ok) return 0;
-            const data = await response.json();
-            if (!data.items) return 0;
-            return averagePageCount(data.items);
-        } catch (e) {
-            return 0;
-        }
-    }
-
-    /* ============================================================
-       KİTAP EKLEME MODAL VE createBook
-    ============================================================ */
-    let pendingBookInfo = null;
-    let bookCharts = {};
-
-    function showStartModal(bookInfo) {
-        pendingBookInfo = bookInfo;
-
-        const existing = document.getElementById('start-modal');
-        if (existing) existing.remove();
-
-        const modal = document.createElement('div');
-        modal.id = 'start-modal';
-        modal.style.cssText = `
-            position:fixed; inset:0; background:rgba(0,0,0,0.45);
-            display:flex; align-items:center; justify-content:center; z-index:999;
-        `;
-
-        modal.innerHTML = `
-            <div style="background:var(--surface);border-radius:var(--radius);padding:28px 32px;
-                        max-width:420px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.2)">
-                <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;color:var(--accent2)">
-                    📖 ${escapeHtml(bookInfo.title)}
-                </h3>
-                <p style="font-size:13px;color:var(--muted);margin-bottom:20px">
-                    Bu kitaba yeni mi başlıyorsunuz, yoksa daha önce başlamış mıydınız?
-                </p>
-
-                <div style="display:flex;gap:10px;margin-bottom:20px">
-                    <button id="modal-new" class="btn btn-primary" style="flex:1;font-size:13px">
-                        🆕 Yeni başlıyorum
-                    </button>
-                    <button id="modal-continue" class="btn btn-outline" style="flex:1;font-size:13px">
-                        📑 Devam ediyorum
-                    </button>
-                </div>
-
-                <div id="modal-page-row" style="display:none;margin-bottom:18px">
-                    <label style="font-size:12px;font-weight:600;color:var(--muted);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">
-                        Hangi sayfadasınız?
-                    </label>
-                    <input type="number" id="modal-page-input" min="1" max="${bookInfo.pages || 9999}" placeholder="Örn: 87" style="width:100%">
-                    ${bookInfo.pages ? `<div style="font-size:11px;color:var(--muted);margin-top:4px">Toplam: ~${bookInfo.pages} sayfa</div>` : ''}
-                </div>
-
-                <div style="display:flex;gap:10px;justify-content:flex-end">
-                    <button id="modal-cancel" class="btn btn-outline btn-sm">İptal</button>
-                    <button id="modal-confirm" class="btn btn-primary btn-sm">Kitabı Ekle →</button>
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        document.getElementById('modal-new').addEventListener('click', () => {
-            document.getElementById('modal-page-row').style.display = 'none';
-            document.getElementById('modal-new').style.background = 'var(--accent2)';
-            document.getElementById('modal-continue').style.background = 'transparent';
-            modal._mode = 'new';
+// Google Books
+async function fetchEditions(titleQuery){
+    let url=`https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(titleQuery)}&maxResults=8`;
+    let res=await fetch(url);
+    if(!res.ok) throw new Error(`API ${res.status}`);
+    let data=await res.json();
+    if(!data.items) return [];
+    let seen=new Set(), editions=[];
+    for(let item of data.items){
+        let v=item.volumeInfo;
+        let pages=v.pageCount||0;
+        let publisher=v.publisher||'';
+        let year=v.publishedDate?v.publishedDate.slice(0,4):'';
+        let key=`${(v.title||'').toLowerCase()}|${publisher}|${year}`;
+        if(seen.has(key)) continue;
+        seen.add(key);
+        editions.push({
+            title:v.title||titleQuery,
+            author:(v.authors&&v.authors[0])||'Bilinmiyor',
+            pages, publisher, year, language:v.language||'',
+            coverUrl:(v.imageLinks?.thumbnail||'').replace('http://','https://'),
+            genre:(v.categories&&v.categories[0])||'Edebiyat',
+            description:v.description?v.description.slice(0,180)+'...':''
         });
-
-        document.getElementById('modal-continue').addEventListener('click', () => {
-            document.getElementById('modal-page-row').style.display = 'block';
-            document.getElementById('modal-continue').style.background = 'var(--accent-light)';
-            document.getElementById('modal-new').style.background = 'transparent';
-            modal._mode = 'continue';
-            document.getElementById('modal-page-input').focus();
-        });
-
-        document.getElementById('modal-cancel').addEventListener('click', () => {
-            modal.remove();
-            pendingBookInfo = null;
-        });
-
-        modal.addEventListener('click', e => {
-            if (e.target === modal) { modal.remove(); pendingBookInfo = null; }
-        });
-
-        document.getElementById('modal-confirm').addEventListener('click', () => {
-            let startPage = 0;
-            if (modal._mode === 'continue') {
-                const inp = parseInt(document.getElementById('modal-page-input').value);
-                if (!inp || inp < 1) {
-                    document.getElementById('modal-page-input').focus();
-                    document.getElementById('modal-page-input').style.borderColor = 'var(--danger)';
-                    return;
-                }
-                startPage = inp;
-            }
-            modal.remove();
-            createBook({ ...pendingBookInfo, startPage });
-            pendingBookInfo = null;
-        });
-
-        modal._mode = 'new';
-        document.getElementById('modal-new').style.background = 'var(--accent2)';
     }
+    return editions;
+}
 
-    function createBook(info) {
-        const newBook = {
-            id: genId(),
-            title: info.title,
-            author: info.author,
-            totalPages: info.pages || 0,
-            genre: info.genre,
-            description: info.description || '',
-            coverUrl: info.coverUrl || '',
-            pagesRead: info.startPage || 0,
-            startPage: info.startPage || 0,
-            readLog: {},
-            weeklyAvgs: {},
-            monthlyAvgs: {},
-            addedDate: todayStr(),
-        };
-
-        STATE.books.push(newBook);
-        saveState();
-
-        document.getElementById('new-book-title').value = '';
-        document.getElementById('book-preview').style.display = 'none';
-        document.getElementById('manual-form').style.display = 'none';
-        previewBookData = null;
-
-        renderSidebar();
-        openBookPanel(newBook.id);
-        updateProfileStats();
-    }
-
-    document.getElementById('confirm-add-btn').addEventListener('click', () => {
-        if (previewBookData) showStartModal(previewBookData);
-    });
-
-    document.getElementById('manual-add-btn').addEventListener('click', () => {
-        document.getElementById('manual-form').style.display = 'block';
-        document.getElementById('book-preview').style.display = 'none';
-    });
-
-    document.getElementById('manual-confirm-btn').addEventListener('click', () => {
-        const title = document.getElementById('new-book-title').value.trim();
-        const author = document.getElementById('manual-author').value.trim();
-        const pages = parseInt(document.getElementById('manual-pages').value) || 0;
-        const genre = document.getElementById('manual-genre').value.trim() || 'Belirtilmemiş';
-        if (!title) { alert('Kitap adı zorunlu!'); return; }
-        showStartModal({ title, author, pages, genre, description: '', coverUrl: '' });
-    });
-
-    /* ============================================================
-       ORTALAMA HESAPLAMA
-    ============================================================ */
-    function recalcAverages(book) {
-        const weekBuckets = {};
-        for (const [date, pages] of Object.entries(book.readLog)) {
-            const wk = getWeekNumber(date);
-            if (!weekBuckets[wk]) weekBuckets[wk] = [];
-            weekBuckets[wk].push(pages);
-        }
-
-        book.weeklyAvgs = {};
-        for (const [wk, arr] of Object.entries(weekBuckets)) {
-            const total = arr.reduce((a, v) => a + v, 0);
-            book.weeklyAvgs[wk] = Math.round(total / arr.length);
-        }
-
-        const monthBuckets = {};
-        for (const [wk, avg] of Object.entries(book.weeklyAvgs)) {
-            const [y, w] = wk.split('-W');
-            const jan4 = new Date(parseInt(y), 0, 4);
-            const w1Mon = new Date(jan4);
-            w1Mon.setDate(jan4.getDate() - (jan4.getDay() || 7) + 1);
-            const wStart = new Date(w1Mon);
-            wStart.setDate(w1Mon.getDate() + (parseInt(w) - 1) * 7);
-            const mk = getMonthKey(wStart.toISOString().slice(0, 10));
-            if (!monthBuckets[mk]) monthBuckets[mk] = [];
-            monthBuckets[mk].push(avg);
-        }
-
-        book.monthlyAvgs = {};
-        for (const [mk, arr] of Object.entries(monthBuckets)) {
-            book.monthlyAvgs[mk] = Math.round(arr.reduce((a, v) => a + v, 0) / arr.length);
-        }
-    }
-
-    /* ============================================================
-       BİTİRİLEN KİTAPLAR
-    ============================================================ */
-    async function addFinishedBook() {
-        const val = document.getElementById('finished-input').value.trim();
-        if (!val) return;
-
-        document.getElementById('fin-btn-txt').style.display = 'none';
-        document.getElementById('fin-loader').style.display = 'inline-block';
-        document.getElementById('add-finished-btn').disabled = true;
-        showStatus('fin-status', 'Sayfa sayısı Google Books\'tan alınıyor...', '');
-
-        const pages = await fetchPageCountForFinished(val);
-
-        STATE.finishedBooks.push({ name: val, pages: pages });
-        saveState();
-
-        document.getElementById('finished-input').value = '';
-        showStatus('fin-status', pages > 0 ? `✓ "${val}" eklendi — ${pages} sayfa bulundu.` : `✓ "${val}" eklendi — sayfa sayısı bulunamadı.`, 'ok');
-
-        document.getElementById('fin-btn-txt').style.display = 'inline';
-        document.getElementById('fin-loader').style.display = 'none';
-        document.getElementById('add-finished-btn').disabled = false;
-
-        updateProfileStats();
-    }
-
-    window.removeFinishedBook = function(idx) {
-        STATE.finishedBooks.splice(idx, 1);
-        saveState();
-        updateProfileStats();
-    };
-
-    document.getElementById('add-finished-btn').addEventListener('click', addFinishedBook);
-    document.getElementById('finished-input').addEventListener('keydown', e => { if (e.key === 'Enter') addFinishedBook(); });
-
-    /* ============================================================
-       SIDEBAR RENDER
-    ============================================================ */
-    function renderSidebar() {
-        const container = document.getElementById('sidebar-books-list');
-        if (!container) return;
-
-        if (STATE.books.length === 0) {
-            container.innerHTML = '<div class="sidebar-label" style="text-align:center;padding:12px">📭 Henüz kitap yok</div>';
-            return;
-        }
-
-        container.innerHTML = STATE.books.map(book => {
-            const pct = book.totalPages > 0 ? Math.round(book.pagesRead / book.totalPages * 100) : 0;
-            const thumbContent = book.coverUrl ? `<img src="${book.coverUrl}" alt="kapak" onerror="this.parentElement.innerHTML='📖'">` : '📖';
-            return `
-                <button class="book-item ${activeBookId === book.id ? 'active' : ''}" onclick="openBookPanel('${book.id}')">
-                    <div class="book-thumb">${thumbContent}</div>
-                    <div class="book-info">
-                        <div class="book-title">${escapeHtml(book.title)}</div>
-                        <div class="book-progress">%${pct} · ${book.pagesRead} sayfa</div>
-                    </div>
-                </button>`;
-        }).join('');
-    }
-
-    let activeBookId = null;
-
-    /* ============================================================
-       KİTAP DETAY PANELİ
-    ============================================================ */
-    window.openBookPanel = function(bookId) {
-        activeBookId = bookId;
-        const book = STATE.books.find(b => b.id === bookId);
-        if (!book) return;
-
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-book-detail').classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-
-        const pct = book.totalPages > 0 ? Math.min(100, Math.round(book.pagesRead / book.totalPages * 100)) : 0;
-        const thumbHtml = book.coverUrl ? `<img src="${book.coverUrl}" alt="Kapak" style="width:100%;height:100%;object-fit:cover;border-radius:8px" onerror="this.parentElement.innerHTML='📚'">` : '📚';
-
-        document.getElementById('panel-book-detail').innerHTML = `
-            <div style="display:flex;gap:20px;margin-bottom:20px;align-items:flex-start">
-                <div style="width:80px;height:110px;background:var(--accent-light);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:40px;flex-shrink:0;overflow:hidden">
-                    ${thumbHtml}
-                </div>
-                <div style="flex:1">
-                    <h2 style="font-size:22px;margin-bottom:6px">${escapeHtml(book.title)}</h2>
-                    <div style="color:var(--muted);margin-bottom:10px">${escapeHtml(book.author)}</div>
-                    <div style="display:flex;gap:8px;flex-wrap:wrap">
-                        <span class="badge badge-green">${escapeHtml(book.genre)}</span>
-                        ${book.totalPages ? `<span class="badge badge-orange">~${book.totalPages} sayfa</span>` : ''}
-                        <span class="badge badge-blue">%${pct} tamamlandı</span>
-                        ${book.startPage > 0 ? `<span class="badge" style="background:#f3e8ff;color:#7c3aed">📑 ${book.startPage}. sayfadan başlandı</span>` : ''}
-                    </div>
-                </div>
-                <button onclick="deleteBook('${bookId}')" style="background:transparent;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--danger);font-size:13px;flex-shrink:0;transition:all 0.2s" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='transparent'">
-                    🗑 Sil
-                </button>
-            </div>
-            ${book.description ? `<div style="background:var(--bg);padding:12px;border-radius:8px;margin-bottom:20px;font-size:13px;line-height:1.5;color:var(--muted)">📝 ${escapeHtml(book.description)}</div>` : ''}
-            <div class="card">
-                <div class="card-title">📊 İlerleme</div>
-                <div style="display:flex;justify-content:space-between;font-size:13px">
-                    <span>${book.pagesRead} / ${book.totalPages || '?'} sayfa okundu${book.startPage > 0 ? `<span style="color:var(--muted);font-size:11px">(bu uygulamada: ${book.pagesRead - book.startPage} sayfa)</span>` : ''}</span>
-                    <span style="font-weight:600;color:var(--accent)">%${pct}</span>
-                </div>
-                <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div>
-                ${book.totalPages > 0 ? `<div style="font-size:12px;color:var(--muted);margin-top:8px">Kalan: <strong>${Math.max(0, book.totalPages - book.pagesRead)}</strong> sayfa</div>` : ''}
-            </div>
-            <div class="card">
-                <div class="card-title">📝 Bugün Kaç Sayfa Okudun?</div>
-                <div class="flex-row">
-                    <input type="number" id="pages-input" placeholder="Sayfa sayısı..." min="1" style="flex:1" onkeydown="if(event.key==='Enter') logPages('${bookId}')">
-                    <button class="btn btn-primary" onclick="logPages('${bookId}')">Kaydet</button>
-                </div>
-                <div id="log-status" class="status-msg"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">📈 Bu Haftalık Okuma (Sayfa/Gün)</div>
-                <div class="chart-container"><canvas id="weekly-chart-${bookId}"></canvas></div>
-                <div id="week-avg-${bookId}" style="font-size:12px;color:var(--muted);margin-top:8px;text-align:right"></div>
-            </div>
-            <div class="card">
-                <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">
-                    <span>📅 Okuma Takvimi</span>
-                    <div style="display:flex;gap:6px;align-items:center">
-                        <button class="btn btn-outline btn-sm" onclick="calNav('${bookId}',-1)">‹</button>
-                        <span id="cal-label-${bookId}" style="font-size:12px;min-width:110px;text-align:center"></span>
-                        <button class="btn btn-outline btn-sm" onclick="calNav('${bookId}',+1)">›</button>
-                    </div>
-                </div>
-                <div id="calendar-${bookId}"></div>
-            </div>
-        `;
-
-        renderSidebar();
-        renderBookChart(bookId);
-        renderCalendar(bookId, new Date().getFullYear(), new Date().getMonth());
-    };
-
-    window.deleteBook = function(bookId) {
-        const book = STATE.books.find(b => b.id === bookId);
-        if (!book) return;
-        const confirmed = confirm(`"${book.title}" kitabını silmek istiyor musunuz?\nBu işlem geri alınamaz.`);
-        if (!confirmed) return;
-
-        STATE.books = STATE.books.filter(b => b.id !== bookId);
-        saveState();
-
-        if (bookCharts[bookId]) {
-            bookCharts[bookId].destroy();
-            delete bookCharts[bookId];
-        }
-
-        activeBookId = null;
-        renderSidebar();
-        document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-        document.getElementById('panel-add').classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector('[data-panel="panel-add"]').classList.add('active');
-        updateProfileStats();
-    };
-
-    /* ============================================================
-       SAYFA KAYDETME
-    ============================================================ */
-    window.logPages = function(bookId) {
-        const book = STATE.books.find(b => b.id === bookId);
-        if (!book) return;
-
-        const pages = parseInt(document.getElementById('pages-input').value);
-        if (isNaN(pages) || pages <= 0) {
-            showStatus('log-status', '⚠ Geçerli sayfa sayısı girin!', 'err');
-            return;
-        }
-
-        const today = todayStr();
-        book.readLog[today] = (book.readLog[today] || 0) + pages;
-        if (book.totalPages > 0) {
-            book.pagesRead = Math.min(book.totalPages, book.pagesRead + pages);
+// küresel arama durumu
+let foundEditions=[], selectedEditionIdx=-1;
+async function searchBook(){
+    let title=document.getElementById('new-book-title').value.trim();
+    if(!title){ showStatus('search-status','Kitap adı girin','err'); return; }
+    document.getElementById('search-btn-txt').style.display='none';
+    document.getElementById('search-loader').style.display='inline-block';
+    document.getElementById('search-btn').disabled=true;
+    document.getElementById('edition-section').style.display='none';
+    showStatus('search-status','Aranıyor...','');
+    try{
+        foundEditions=await fetchEditions(title);
+        if(foundEditions.length===0){
+            showStatus('search-status','Hiç baskı bulunamadı, sayfa sayısını girebilirsiniz.','err');
+            showEditionSection([]);
         } else {
-            book.pagesRead += pages;
+            showStatus('search-status',`${foundEditions.length} baskı bulundu, seçin.`,'ok');
+            showEditionSection(foundEditions);
         }
+    }catch(e){ showStatus('search-status','Hata: '+e.message,'err'); showEditionSection([]); }
+    finally{ document.getElementById('search-btn-txt').style.display='inline'; document.getElementById('search-loader').style.display='none'; document.getElementById('search-btn').disabled=false; }
+}
 
-        recalcAverages(book);
-        saveState();
+function showEditionSection(editions){
+    selectedEditionIdx=-1;
+    let listDiv=document.getElementById('edition-list');
+    if(editions.length===0) listDiv.innerHTML='<div style="padding:12px;text-align:center">Baskı yok, manuel giriş yapabilirsiniz</div>';
+    else{
+        listDiv.innerHTML=editions.map((ed,i)=>`<button class="edition-card" data-idx="${i}"><div class="edition-cover">${ed.coverUrl?`<img src="${ed.coverUrl}" onerror="this.parentElement.innerHTML='📖'">`:'📖'}</div><div><div class="edition-title"><strong>${escapeHtml(ed.title)}</strong><br><span style="font-size:11px">${escapeHtml(ed.author)}</span></div><div>${ed.pages>0?ed.pages+' sayfa':'?'}</div></div><div class="edition-radio"></div></button>`).join('');
+        document.querySelectorAll('.edition-card').forEach(card=>{ card.addEventListener('click',()=>{ let idx=parseInt(card.dataset.idx); selectedEditionIdx=idx; document.querySelectorAll('.edition-card').forEach(c=>c.classList.remove('selected')); card.classList.add('selected'); document.getElementById('manual-page-override').value=''; }); });
+    }
+    document.getElementById('edition-section').style.display='block';
+}
+window.selectEditionGlobal=function(idx){ selectedEditionIdx=idx; };
+document.getElementById('confirm-edition-btn')?.addEventListener('click',()=>{
+    let manual=parseInt(document.getElementById('manual-page-override').value);
+    let hasManual=!isNaN(manual)&&manual>0;
+    if(selectedEditionIdx===-1 && !hasManual){ alert('Baskı seçin ya da sayfa sayısını yazın'); return; }
+    let bookInfo;
+    if(hasManual){
+        let base=selectedEditionIdx>=0?foundEditions[selectedEditionIdx]:(foundEditions[0]||{});
+        let titleInput=document.getElementById('new-book-title').value.trim();
+        bookInfo={ title:base.title||titleInput, author:base.author||'Bilinmiyor', pages:manual, genre:base.genre||'Belirtilmemiş', description:base.description||'', coverUrl:base.coverUrl||'' };
+    } else {
+        let ed=foundEditions[selectedEditionIdx];
+        if(!ed.pages){ alert('Bu baskının sayfa sayısı bilinmiyor, lütfen sayfa sayısını manuel girin'); return; }
+        bookInfo={ ...ed };
+    }
+    document.getElementById('edition-section').style.display='none';
+    showStartModal(bookInfo);
+});
+document.getElementById('cancel-edition-btn')?.addEventListener('click',()=>{ document.getElementById('edition-section').style.display='none'; });
+document.getElementById('search-btn')?.addEventListener('click',searchBook);
 
-        showStatus('log-status', `✓ ${pages} sayfa kaydedildi! Bugün toplam: ${book.readLog[today]} sayfa`, 'ok');
-        document.getElementById('pages-input').value = '';
-
-        openBookPanel(bookId);
-        renderProfileCharts();
+function showStartModal(bookInfo){
+    let existing=document.getElementById('start-modal');
+    if(existing) existing.remove();
+    let modalDiv=document.createElement('div'); modalDiv.id='start-modal'; modalDiv.className='modal-overlay';
+    modalDiv.innerHTML=`<div class="modal-card"><h3 style="font-size:1.4rem">${escapeHtml(bookInfo.title)}</h3><p style="margin:4px 0 12px">${escapeHtml(bookInfo.author)} • ${bookInfo.pages?bookInfo.pages+' sayfa':''}</p><div style="display:flex;gap:10px;margin-bottom:14px"><button id="modal-new" class="btn btn-primary" style="flex:1">🆕 Yeni başlıyorum</button><button id="modal-continue" class="btn btn-outline" style="flex:1">📑 Devam ediyorum</button></div><div id="modal-page-row" style="display:none;margin-bottom:18px"><label>Hangi sayfadasınız?</label><input type="number" id="modal-page-input" min="1" max="${bookInfo.pages||9999}" placeholder="örn: 45" style="width:100%"></div><div style="display:flex;gap:8px;justify-content:flex-end"><button id="modal-cancel" class="btn btn-outline btn-sm">İptal</button><button id="modal-confirm" class="btn btn-primary btn-sm">Kitabı ekle</button></div></div>`;
+    document.body.appendChild(modalDiv);
+    let mode='new';
+    document.getElementById('modal-new').onclick=()=>{ mode='new'; document.getElementById('modal-page-row').style.display='none'; document.getElementById('modal-new').style.background='var(--accent2)'; document.getElementById('modal-continue').style.background='transparent'; };
+    document.getElementById('modal-continue').onclick=()=>{ mode='continue'; document.getElementById('modal-page-row').style.display='block'; document.getElementById('modal-continue').style.background='var(--accent-light)'; document.getElementById('modal-new').style.background='transparent'; };
+    document.getElementById('modal-cancel').onclick=()=>modalDiv.remove();
+    document.getElementById('modal-confirm').onclick=()=>{
+        let startPage=0;
+        if(mode==='continue'){
+            let inp=parseInt(document.getElementById('modal-page-input').value);
+            if(!inp||inp<1){ alert('Sayfa numarası girin'); return; }
+            startPage=inp;
+        }
+        createBook({...bookInfo, startPage});
+        modalDiv.remove();
     };
+}
 
-    /* ============================================================
-       GRAFİK FONKSİYONLARI
-    ============================================================ */
-    function renderBookChart(bookId) {
-        const book = STATE.books.find(b => b.id === bookId);
-        const canvas = document.getElementById(`weekly-chart-${bookId}`);
-        if (!book || !canvas) return;
-
-        const today = new Date();
-        const dow = today.getDay() || 7;
-        const monday = new Date(today);
-        monday.setDate(today.getDate() - dow + 1);
-
-        const labels = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
-        const data = [];
-        const colors = [];
-        let weekTotal = 0;
-        let readDays = 0;
-
-        for (let i = 0; i < 7; i++) {
-            const d = new Date(monday);
-            d.setDate(monday.getDate() + i);
-            const ds = d.toISOString().split('T')[0];
-            const pages = book.readLog[ds] || 0;
-            data.push(pages);
-            colors.push(d.toDateString() === today.toDateString() ? '#1b4332' : '#52b788');
-            if (pages > 0) { weekTotal += pages; readDays++; }
-        }
-
-        if (bookCharts[bookId]) { bookCharts[bookId].destroy(); }
-
-        bookCharts[bookId] = new Chart(canvas, {
-            type: 'bar',
-            data: { labels, datasets: [{ label: 'Sayfa', data, backgroundColor: colors, borderRadius: 6 }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 10, font: { size: 11 } } }, x: { ticks: { font: { size: 11 } }, grid: { display: false } } } }
-        });
-
-        const avgEl = document.getElementById(`week-avg-${bookId}`);
-        if (avgEl) {
-            const avg = readDays > 0 ? Math.round(weekTotal / readDays) : 0;
-            avgEl.textContent = `Bu hafta toplam: ${weekTotal} sayfa  |  Ortalama: ${avg} sayfa/gün (${readDays} gün)`;
-        }
-    }
-
-    let weeklyChart = null;
-    let monthlyChart = null;
-
-    function renderProfileCharts() {
-        const weeklyData = {};
-        STATE.books.forEach(book => {
-            Object.entries(book.readLog).forEach(([date, pages]) => {
-                const wk = getWeekNumber(date);
-                if (!weeklyData[wk]) weeklyData[wk] = [];
-                weeklyData[wk].push(pages);
-            });
-        });
-
-        const weeks = Object.keys(weeklyData).sort();
-        const wLabels = weeks.map(w => w.replace('-W', ' Hf.'));
-        const wData = weeks.map(w => Math.round(weeklyData[w].reduce((a, b) => a + b, 0) / weeklyData[w].length));
-
-        if (weeklyChart) weeklyChart.destroy();
-        const wCanvas = document.getElementById('chart-weekly');
-        if (wCanvas) {
-            weeklyChart = new Chart(wCanvas, {
-                type: 'line',
-                data: { labels: wLabels.length ? wLabels : ['Veri yok'], datasets: [{ label: 'Ort. Sayfa/Gün', data: wData.length ? wData : [0], borderColor: '#2d6a4f', tension: 0.3, fill: true, backgroundColor: 'rgba(45,106,79,0.1)', pointBackgroundColor: '#1b4332', pointRadius: 4 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { font: { size: 11 } } }, x: { ticks: { font: { size: 10 }, maxRotation: 40 } } } }
-            });
-        }
-
-        const monthlyData = {};
-        STATE.books.forEach(book => {
-            Object.entries(book.monthlyAvgs || {}).forEach(([mk, avg]) => {
-                if (!monthlyData[mk]) monthlyData[mk] = [];
-                monthlyData[mk].push(avg);
-            });
-        });
-
-        const months = Object.keys(monthlyData).sort();
-        const TR_MONTHS = ['Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz', 'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara'];
-        const mLabels = months.map(mk => { const [y, m] = mk.split('-'); return `${TR_MONTHS[parseInt(m) - 1]} ${y}`; });
-        const mData = months.map(mk => Math.round(monthlyData[mk].reduce((a, v) => a + v, 0) / monthlyData[mk].length));
-
-        if (monthlyChart) monthlyChart.destroy();
-        const mCanvas = document.getElementById('chart-monthly');
-        if (mCanvas) {
-            monthlyChart = new Chart(mCanvas, {
-                type: 'bar',
-                data: { labels: mLabels.length ? mLabels : ['Veri yok'], datasets: [{ label: 'Ort. Sayfa/Gün', data: mData.length ? mData : [0], backgroundColor: '#52b788', borderRadius: 6 }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { font: { size: 11 } } }, x: { ticks: { font: { size: 11 } } } } }
-            });
-        }
-    }
-
-    /* ============================================================
-       TAKVİM
-    ============================================================ */
-    const calState = {};
-
-    function renderCalendar(bookId, year, month) {
-        calState[bookId] = { year, month };
-        const book = STATE.books.find(b => b.id === bookId);
-        const container = document.getElementById(`calendar-${bookId}`);
-        const labelEl = document.getElementById(`cal-label-${bookId}`);
-        if (!book || !container) return;
-
-        const TR_MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
-        if (labelEl) labelEl.textContent = `${TR_MONTHS[month]} ${year}`;
-
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const today = todayStr();
-        const startPad = (firstDay.getDay() || 7) - 1;
-
-        let html = '<div class="calendar-grid">';
-        ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'].forEach(d => { html += `<div class="cal-day-name">${d}</div>`; });
-        for (let i = 0; i < startPad; i++) html += '<div class="cal-cell empty"></div>';
-        for (let d = 1; d <= lastDay.getDate(); d++) {
-            const ds = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            const pages = book.readLog[ds] || 0;
-            const isToday = ds === today;
-            let cls = 'cal-cell';
-            if (pages > 0) cls += ' has-read';
-            if (isToday) cls += ' today';
-            const tip = pages > 0 ? `title="${pages} sayfa okundu"` : '';
-            html += `<div class="${cls}" ${tip}>${d}</div>`;
-        }
-        html += '</div>';
-        container.innerHTML = html;
-    }
-
-    window.calNav = function(bookId, dir) {
-        const cs = calState[bookId] || { year: new Date().getFullYear(), month: new Date().getMonth() };
-        let { year, month } = cs;
-        month += dir;
-        if (month < 0) { month = 11; year--; }
-        if (month > 11) { month = 0; year++; }
-        renderCalendar(bookId, year, month);
-    };
-
-    /* ============================================================
-       PROFİL SAYFASI
-    ============================================================ */
-    function updateProfileStats() {
-        document.getElementById('stat-total-books').textContent = STATE.books.length;
-        document.getElementById('stat-finished').textContent = STATE.finishedBooks.length;
-
-        const activePagesRead = STATE.books.reduce((sum, b) => sum + (b.pagesRead || 0), 0);
-        const finishedPages = STATE.finishedBooks.reduce((sum, b) => sum + (b.pages || 0), 0);
-        document.getElementById('stat-total-pages').textContent = activePagesRead + finishedPages;
-
-        const listEl = document.getElementById('finished-list');
-        if (!listEl) return;
-
-        if (STATE.finishedBooks.length === 0) {
-            listEl.innerHTML = '<div class="status-msg">Henüz bitirilen kitap eklenmemiş.</div>';
-            return;
-        }
-
-        listEl.innerHTML = STATE.finishedBooks.map((item, i) => `
-            <div class="finished-book">
-                <div class="finished-book-info">
-                    <span>📗 ${escapeHtml(item.name)}</span>
-                    <span class="finished-book-pages">${item.pages > 0 ? `${item.pages} sayfa` : 'Sayfa sayısı bilinmiyor'}</span>
-                </div>
-                <button class="btn btn-sm" style="color:var(--danger);background:transparent;border:none;cursor:pointer" onclick="removeFinishedBook(${i})">✕</button>
-            </div>
-        `).join('');
-    }
-
-    /* ============================================================
-       PANEL DEĞİŞTİRME
-    ============================================================ */
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const panelId = btn.dataset.panel;
-            if (!panelId) return;
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.getElementById(panelId).classList.add('active');
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if (panelId === 'panel-profile') {
-                updateProfileStats();
-                renderProfileCharts();
-            }
-        });
-    });
-
-    /* ============================================================
-       BAŞLATMA
-    ============================================================ */
-    (function() {
-        const now = new Date();
-        const el = document.getElementById('header-date');
-        if (el) el.textContent = now.toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    })();
-
-    renderSidebar();
+function createBook(info){
+    let newBook={ id:genId(), title:info.title, author:info.author, totalPages:info.pages||0, genre:info.genre, description:info.description||'', coverUrl:info.coverUrl||'', pagesRead:info.startPage||0, startPage:info.startPage||0, readLog:{}, weeklyAvgs:{}, monthlyAvgs:{}, addedDate:todayStr() };
+    STATE.books.push(newBook);
+    saveState();
+    document.getElementById('new-book-title').value='';
+    document.getElementById('edition-section').style.display='none';
+    renderMobileBookList();
+    openBookPanel(newBook.id);
     updateProfileStats();
+}
+
+function recalcAverages(book){
+    let weekBuckets={};
+    for(let [date,pages] of Object.entries(book.readLog)){ let wk=getWeekNumber(date); if(!weekBuckets[wk]) weekBuckets[wk]=[]; weekBuckets[wk].push(pages); }
+    book.weeklyAvgs={}; for(let [wk,arr] of Object.entries(weekBuckets)) book.weeklyAvgs[wk]=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+    let monthBuckets={};
+    for(let [wk,avg] of Object.entries(book.weeklyAvgs)){ let [y,w]=wk.split('-W'); let jan4=new Date(parseInt(y),0,4); let mon=new Date(jan4); mon.setDate(jan4.getDate()-((jan4.getDay()||7)-1)); mon.setDate(mon.getDate()+(parseInt(w)-1)*7); let mk=getMonthKey(mon.toISOString().slice(0,10)); if(!monthBuckets[mk]) monthBuckets[mk]=[]; monthBuckets[mk].push(avg); }
+    book.monthlyAvgs={}; for(let [mk,arr] of Object.entries(monthBuckets)) book.monthlyAvgs[mk]=Math.round(arr.reduce((a,b)=>a+b,0)/arr.length);
+}
+
+let activeBookId=null;
+function renderMobileBookList(){
+    let container=document.getElementById('sidebar-books-list-mobile');
+    if(!container) return;
+    if(STATE.books.length===0){ container.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Henüz kitap yok</div>'; return; }
+    container.innerHTML=STATE.books.map(book=>{ let pct=book.totalPages>0?Math.round(book.pagesRead/book.totalPages*100):0; return `<div class="mobile-book-item ${activeBookId===book.id?'active':''}" data-id="${book.id}"><div class="book-thumb-mob">${book.coverUrl?`<img src="${book.coverUrl}" style="width:100%;height:100%;object-fit:cover">`:'📖'}</div><div class="book-info-mob"><div class="book-title-mob">${escapeHtml(book.title)}</div><div class="book-progress-mob">%${pct} · ${book.pagesRead} sayfa</div></div></div>`; }).join('');
+    document.querySelectorAll('.mobile-book-item').forEach(el=>{ el.addEventListener('click',()=>{ let id=el.dataset.id; if(id) openBookPanel(id); }); });
+}
+
+window.openBookPanel=function(bookId){
+    activeBookId=bookId;
+    let book=STATE.books.find(b=>b.id===bookId);
+    if(!book) return;
+    document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+    document.getElementById('panel-book-detail').classList.add('active');
+    document.querySelectorAll('.mobile-tab-btn').forEach(btn=>btn.classList.remove('active'));
+    let bookTab=document.getElementById('book-detail-tab'); if(bookTab) bookTab.style.display='flex';
+    document.getElementById('book-detail-tab')?.classList.add('active');
+    renderBookDetail(book);
+    renderMobileBookList();
+};
+function renderBookDetail(book){
+    let pct=book.totalPages>0?Math.min(100,Math.round(book.pagesRead/book.totalPages*100)):0;
+    let thumbHtml=book.coverUrl?`<img src="${book.coverUrl}" style="width:100%;height:100%;object-fit:cover">`:'📚';
+    let detailDiv=document.getElementById('panel-book-detail');
+    detailDiv.innerHTML=`<div style="margin-bottom:20px"><div style="display:flex;gap:14px"><div style="width:70px;height:100px;background:var(--accent-light);border-radius:14px;display:flex;align-items:center;justify-content:center;overflow:hidden">${thumbHtml}</div><div><h2 style="font-size:1.6rem">${escapeHtml(book.title)}</h2><div style="color:var(--muted)">${escapeHtml(book.author)}</div><div class="flex-row" style="margin-top:8px"><span class="badge badge-green">${escapeHtml(book.genre)}</span><span class="badge badge-orange">%${pct}</span></div></div><button onclick="deleteBook('${book.id}')" style="background:transparent;border:1px solid var(--border);border-radius:30px;padding:6px 12px;color:var(--danger)">🗑</button></div></div>
+    ${book.description?`<div class="card">📝 ${escapeHtml(book.description)}</div>`:''}
+    <div class="card"><div class="card-title">📊 İlerleme</div><div>${book.pagesRead} / ${book.totalPages||'?'} sayfa</div><div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct}%"></div></div></div>
+    <div class="card"><div class="card-title">📝 Bugün okunan</div><div class="flex-row"><input id="pages-input" type="number" placeholder="Sayfa sayısı" style="flex:1"><button class="btn btn-primary" onclick="logPages('${book.id}')">Kaydet</button></div><div id="log-status" class="status-msg"></div></div>
+    <div class="card"><div class="card-title">📈 Bu Haftalık Ortalama</div><div class="chart-container"><canvas id="weekly-chart-${book.id}"></canvas></div><div id="week-avg-${book.id}"></div></div>
+    <div class="card"><div class="card-title" style="display:flex;justify-content:space-between"><span>📅 Takvim</span><div><button class="btn btn-outline btn-sm" onclick="calNav('${book.id}',-1)">◀</button><button class="btn btn-outline btn-sm" onclick="calNav('${book.id}',1)">▶</button></div></div><div id="calendar-${book.id}"></div></div>`;
+    renderBookChart(book.id);
+    renderCalendar(book.id, new Date().getFullYear(), new Date().getMonth());
+}
+window.logPages=function(bookId){
+    let book=STATE.books.find(b=>b.id===bookId);
+    if(!book) return;
+    let pages=parseInt(document.getElementById('pages-input').value);
+    if(isNaN(pages)||pages<=0){ showStatus('log-status','Geçerli sayfa','err'); return; }
+    let today=todayStr();
+    book.readLog[today]=(book.readLog[today]||0)+pages;
+    book.pagesRead=book.totalPages>0?Math.min(book.totalPages, book.pagesRead+pages):book.pagesRead+pages;
+    recalcAverages(book);
+    saveState();
+    showStatus('log-status',`+${pages} sayfa kaydedildi`,'ok');
+    document.getElementById('pages-input').value='';
+    openBookPanel(bookId);
+    renderProfileCharts();
+};
+function renderBookChart(bookId){
+    let book=STATE.books.find(b=>b.id===bookId);
+    let canvas=document.getElementById(`weekly-chart-${bookId}`);
+    if(!book||!canvas) return;
+    let today=new Date(); let dow=today.getDay()||7; let monday=new Date(today); monday.setDate(today.getDate()-dow+1);
+    let labels=['Pzt','Sal','Çar','Per','Cum','Cmt','Paz']; let data=[];
+    for(let i=0;i<7;i++){ let d=new Date(monday); d.setDate(monday.getDate()+i); let ds=d.toISOString().split('T')[0]; data.push(book.readLog[ds]||0); }
+    let ctx=canvas.getContext('2d'); if(window[`chart_${bookId}`]) window[`chart_${bookId}`].destroy();
+    window[`chart_${bookId}`]=new Chart(ctx,{ type:'bar', data:{ labels, datasets:[{ label:'Sayfa', data, backgroundColor:'#52b788', borderRadius:8 }] }, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:false } } } });
+}
+window.deleteBook=function(bookId){ if(confirm('Kitabı sil?')){ STATE.books=STATE.books.filter(b=>b.id!==bookId); saveState(); if(activeBookId===bookId) activeBookId=null; renderMobileBookList(); updateProfileStats(); document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById('panel-add').classList.add('active'); document.querySelectorAll('.mobile-tab-btn').forEach(b=>b.classList.remove('active')); document.querySelector('[data-panel="panel-add"]').classList.add('active'); document.getElementById('book-detail-tab').style.display='none'; }};
+let calState={};
+function renderCalendar(bookId,year,month){ let book=STATE.books.find(b=>b.id===bookId); let container=document.getElementById(`calendar-${bookId}`); if(!book||!container) return; let firstDay=new Date(year,month,1); let lastDay=new Date(year,month+1,0); let startPad=(firstDay.getDay()||7)-1; let html='<div class="calendar-grid">'; ['Pzt','Sal','Çar','Per','Cum','Cmt','Paz'].forEach(d=>html+=`<div class="cal-day-name">${d}</div>`); for(let i=0;i<startPad;i++) html+=`<div class="cal-cell empty"></div>`; for(let d=1;d<=lastDay.getDate();d++){ let ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; let pages=book.readLog[ds]||0; let cls='cal-cell'; if(pages>0) cls+=' has-read'; if(ds===todayStr()) cls+=' today'; html+=`<div class="${cls}">${d}</div>`; } html+='</div>'; container.innerHTML=html; }
+window.calNav=function(bookId,dir){ let cs=calState[bookId]||{ year:new Date().getFullYear(), month:new Date().getMonth() }; let {year,month}=cs; month+=dir; if(month<0){ month=11; year--; } if(month>11){ month=0; year++; } calState[bookId]={year,month}; renderCalendar(bookId,year,month); };
+function updateProfileStats(){ document.getElementById('stat-total-books').innerText=STATE.books.length; document.getElementById('stat-finished').innerText=STATE.finishedBooks.length; let activePages=STATE.books.reduce((s,b)=>s+(b.pagesRead||0),0); let finishedPages=STATE.finishedBooks.reduce((s,b)=>s+(b.pages||0),0); document.getElementById('stat-total-pages').innerText=activePages+finishedPages; let listDiv=document.getElementById('finished-list'); if(STATE.finishedBooks.length===0) listDiv.innerHTML='<div class="status-msg">Henüz eklenmemiş</div>'; else listDiv.innerHTML=STATE.finishedBooks.map((item,i)=>`<div class="finished-book"><span>📗 ${escapeHtml(item.name)} <span style="font-size:12px">${item.pages>0?item.pages+' sayfa':''}</span></span><button onclick="removeFinishedBook(${i})" style="background:transparent;border:none;color:var(--danger);font-size:18px;">✕</button></div>`).join(''); }
+window.removeFinishedBook=function(idx){ STATE.finishedBooks.splice(idx,1); saveState(); updateProfileStats(); };
+let weeklyChart=null, monthlyChart=null;
+function renderProfileCharts(){ let weeklyData={}; STATE.books.forEach(b=>{ Object.entries(b.readLog).forEach(([date,pages])=>{ let wk=getWeekNumber(date); if(!weeklyData[wk]) weeklyData[wk]=[]; weeklyData[wk].push(pages); }); }); let weeks=Object.keys(weeklyData).sort(); let wData=weeks.map(w=>Math.round(weeklyData[w].reduce((a,b)=>a+b,0)/weeklyData[w].length)); if(weeklyChart) weeklyChart.destroy(); let wCanvas=document.getElementById('chart-weekly'); if(wCanvas) weeklyChart=new Chart(wCanvas,{ type:'line', data:{ labels:weeks.length?weeks.map(w=>w.slice(-2)):['Veri'], datasets:[{ label:'Ortalama', data:wData.length?wData:[0], borderColor:'#2d6a4f', tension:0.3, fill:true }] }, options:{ responsive:true, maintainAspectRatio:false } }); let monthlyData={}; STATE.books.forEach(b=>{ Object.entries(b.monthlyAvgs||{}).forEach(([mk,avg])=>{ if(!monthlyData[mk]) monthlyData[mk]=[]; monthlyData[mk].push(avg); }); }); let months=Object.keys(monthlyData).sort(); let mData=months.map(m=>Math.round(monthlyData[m].reduce((a,b)=>a+b,0)/monthlyData[m].length)); if(monthlyChart) monthlyChart.destroy(); let mCanvas=document.getElementById('chart-monthly'); if(mCanvas) monthlyChart=new Chart(mCanvas,{ type:'bar', data:{ labels:months.length?months.map(m=>m.slice(5)):['Veri'], datasets:[{ label:'Ortalama', data:mData.length?mData:[0], backgroundColor:'#52b788' }] }, options:{ responsive:true, maintainAspectRatio:false } }); }
+async function addFinishedBook(){ let val=document.getElementById('finished-input').value.trim(); if(!val) return; let btn=document.getElementById('add-finished-btn'); btn.disabled=true; try{ let editions=await fetchEditions(val); showFinishedModal(val,editions); }catch(e){ showStatus('fin-status','Hata: '+e.message,'err'); }finally{ btn.disabled=false; } }
+function showFinishedModal(bookName,editions){ let modal=document.createElement('div'); modal.className='modal-overlay'; let selIdx=-1; let rows=editions.map((ed,i)=>`<button class="edition-card" data-idx="${i}"><div class="edition-cover">${ed.coverUrl?`<img src="${ed.coverUrl}">`:'📖'}</div><div><strong>${escapeHtml(ed.title)}</strong><br>${ed.author} · ${ed.pages>0?ed.pages+' sf':'?'}</div></button>`).join(''); modal.innerHTML=`<div class="modal-card"><h3>Baskı Seç</h3><div>${rows||'Baskı bulunamadı'}</div><div style="margin:12px 0"><input id="manualPagesFin" type="number" placeholder="Sayfa sayısını kendin gir" style="width:100%"></div><div class="flex-row"><button id="modalFinCancel" class="btn btn-outline">İptal</button><button id="modalFinOk" class="btn btn-primary">Ekle</button></div></div>`; document.body.appendChild(modal); modal.querySelectorAll('.edition-card').forEach(c=>c.addEventListener('click',()=>{ selIdx=parseInt(c.dataset.idx); modal.querySelectorAll('.edition-card').forEach(c=>c.classList.remove('selected')); c.classList.add('selected'); document.getElementById('manualPagesFin').value=''; })); document.getElementById('modalFinCancel').onclick=()=>modal.remove(); document.getElementById('modalFinOk').onclick=()=>{ let manual=parseInt(document.getElementById('manualPagesFin').value); let pages=0; if(!isNaN(manual)&&manual>0) pages=manual; else if(selIdx>=0) pages=editions[selIdx]?.pages||0; if(pages<=0){ alert('Sayfa sayısı belirtin'); return; } STATE.finishedBooks.push({ name:bookName, pages }); saveState(); updateProfileStats(); modal.remove(); document.getElementById('finished-input').value=''; showStatus('fin-status','Kitap eklendi','ok'); }; }
+document.getElementById('add-finished-btn')?.addEventListener('click',addFinishedBook);
+function showStatus(id,msg,type){ let el=document.getElementById(id); if(el){ el.textContent=msg; el.className='status-msg'+(type?' '+type:''); } }
+function initTabs(){ document.querySelectorAll('.mobile-tab-btn').forEach(btn=>{ btn.addEventListener('click',()=>{ let panelId=btn.dataset.panel; if(!panelId) return; document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active')); document.getElementById(panelId).classList.add('active'); document.querySelectorAll('.mobile-tab-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); if(panelId==='panel-profile'){ updateProfileStats(); renderProfileCharts(); } if(panelId!=='panel-book-detail') document.getElementById('book-detail-tab').style.display='none'; else document.getElementById('book-detail-tab').style.display='flex'; }); }); }
+document.getElementById('header-date').innerText=new Date().toLocaleDateString('tr-TR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+renderMobileBookList(); updateProfileStats(); renderProfileCharts(); initTabs();
 </script>
 </body>
 </html>
