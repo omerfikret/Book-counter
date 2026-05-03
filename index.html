@@ -4,65 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>Kitap Okuma Sayacı</title>
+    <link rel="icon" type="image/png" href="x-removebg-preview.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            --bg: #f8f7f4;
-            --surface: #ffffff;
-            --border: rgba(0,0,0,0.08);
-            --text: #1a1a1a;
-            --muted: #6b6b6b;
-            --accent: #2d6a4f;
-            --accent-light: #e8f5e9;
-            --accent2: #1b4332;
-            --danger: #c0392b;
+            --bg: #F5F2EB;           /* Klasik kitap kağıdı tonu */
+            --surface: #FFFFFF;
+            --surface-secondary: #FCFAF5;
+            --border: #E6E0D5;
+            --text: #2C2A29;
+            --text-light: #5B5A59;
+            --muted: #8A8681;
+            --accent: #B76E2E;       /* Sıcak klasik kahve / deri tonu */
+            --accent-light: #FDF6EC;
+            --accent-dark: #9B5A24;
+            --accent2: #8B6B4A;      /* Yardımcı toprak tonu */
+            --accent2-light: #F5EFE6;
+            --success: #2D6A4F;
+            --success-light: #E8F3EE;
+            --warning: #E67E22;
+            --danger: #C0392B;
             --radius: 16px;
-            --shadow: 0 4px 12px rgba(0,0,0,0.04);
+            --radius-sm: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --transition: all 0.2s ease;
+            --anacerceve: none;
         }
 
         body {
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Georgia', serif;
             background: var(--bg);
             color: var(--text);
             font-size: 15px;
-            min-height: 100vh;
-            padding-bottom: env(safe-area-inset-bottom, 0);
+            min-height: 100dvh;
+            height: 100dvh;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
         }
 
-        /* ── Header ─────────────────────────────────────── */
+        /* App container - tam yükseklik */
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh;
+            width: 100%;
+            max-width: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
         .header {
-            background: var(--accent2);
-            color: white;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            color: var(--text);
             padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            position: sticky;
-            top: 0;
+            flex-shrink: 0;
             z-index: 100;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-        .header h1 { font-size: 1.15rem; font-weight: 600; }
-        .header-date { font-size: 0.7rem; opacity: 0.85; }
+        .header h1 { 
+            font-size: 1.15rem; 
+            font-weight: 600;
+            color: var(--accent);
+            letter-spacing: -0.3px;
+        }
+        .header-date { 
+            font-size: 0.7rem; 
+            color: var(--muted);
+        }
 
-        /* ── Layout ─────────────────────────────────────── */
-        .layout { display: flex; flex-direction: column; min-height: calc(100vh - 56px); }
-        .content { flex: 1; padding: 18px 16px 100px 16px; overflow-y: auto; }
+        .layout { 
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
+        }
+        .content { 
+            flex: 1;
+            padding: 18px 16px 16px 16px;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
 
-        /* ── Bottom Tab Bar ─────────────────────────────── */
         .bottom-tab-bar {
-            position: fixed;
-            bottom: 0; left: 0; right: 0;
-            background: rgba(255,255,255,0.96);
-            backdrop-filter: blur(12px);
+            position: relative;
+            background: var(--surface);
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
             align-items: center;
-            padding: 10px 16px;
-            padding-bottom: max(12px, env(safe-area-inset-bottom));
+            padding: 8px 16px;
+            padding-bottom: max(8px, env(safe-area-inset-bottom));
+            flex-shrink: 0;
             z-index: 110;
         }
         .mobile-tab-btn {
@@ -75,24 +118,31 @@
             font-size: 12px;
             font-weight: 500;
             color: var(--muted);
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 30px;
-            transition: all 0.2s;
+            transition: var(--transition);
             cursor: pointer;
             font-family: inherit;
         }
         .mobile-tab-btn .tab-icon { font-size: 22px; }
-        .mobile-tab-btn.active { color: var(--accent); background: var(--accent-light); font-weight: 600; }
+        .mobile-tab-btn.active { 
+            color: var(--accent); 
+            background: var(--accent-light); 
+            font-weight: 600;
+        }
 
-        /* ── Panels ─────────────────────────────────────── */
         .panel { display: none; animation: fadeIn 0.2s ease; }
         .panel.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* ── Typography / Spacing ───────────────────────── */
-        .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 20px; color: var(--accent2); }
+        .section-title { 
+            font-size: 1.5rem; 
+            font-weight: 600; 
+            margin-bottom: 20px; 
+            color: var(--text);
+            letter-spacing: -0.3px;
+        }
 
-        /* ── Card ───────────────────────────────────────── */
         .card {
             background: var(--surface);
             border-radius: var(--radius);
@@ -103,19 +153,18 @@
         }
         .card-title {
             font-size: 12px;
-            font-weight: 700;
+            font-weight: 600;
             text-transform: uppercase;
-            color: var(--muted);
+            color: var(--accent);
             letter-spacing: 0.5px;
             margin-bottom: 14px;
         }
 
-        /* ── Form ───────────────────────────────────────── */
         .form-group { margin-bottom: 14px; }
         .form-group label {
             font-size: 13px;
             font-weight: 500;
-            color: var(--muted);
+            color: var(--text-light);
             margin-bottom: 6px;
             display: block;
         }
@@ -123,17 +172,20 @@
             width: 100%;
             padding: 12px 14px;
             border: 1.5px solid var(--border);
-            border-radius: 14px;
+            border-radius: var(--radius-sm);
             background: var(--bg);
             font-family: inherit;
             font-size: 15px;
-            transition: all 0.2s;
+            transition: var(--transition);
             color: var(--text);
             -webkit-appearance: none;
         }
-        input:focus { outline: none; border-color: var(--accent); background: white; }
+        input:focus { 
+            outline: none; 
+            border-color: var(--accent); 
+            background: var(--surface);
+        }
 
-        /* ── Buttons ────────────────────────────────────── */
         .btn {
             padding: 11px 18px;
             border-radius: 30px;
@@ -141,66 +193,79 @@
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
-            transition: all 0.18s;
+            transition: var(--transition);
             display: inline-flex;
             align-items: center;
             gap: 6px;
             justify-content: center;
             font-family: inherit;
         }
-        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary { 
+            background: var(--accent); 
+            color: white;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
         .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
         .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
         .btn-sm { padding: 8px 14px; font-size: 13px; }
 
-        /* ── Helpers ────────────────────────────────────── */
         .flex-row { display: flex; gap: 10px; flex-wrap: nowrap; align-items: center; }
         .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 
-        /* ── Metric ─────────────────────────────────────── */
-        .metric { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 14px 6px; text-align: center; }
-        .metric-val { font-size: 26px; font-weight: 800; color: var(--accent2); }
+        .metric { 
+            background: var(--surface-secondary);
+            border: 1px solid var(--border);
+            border-radius: 20px; 
+            padding: 14px 6px; 
+            text-align: center;
+        }
+        .metric-val { font-size: 26px; font-weight: 700; color: var(--accent); }
         .metric-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
 
-        /* ── Progress ───────────────────────────────────── */
-        .progress-bar-wrap { background: var(--bg); border-radius: 30px; height: 8px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-wrap { background: var(--border); border-radius: 30px; height: 8px; overflow: hidden; margin-top: 10px; }
         .progress-bar-fill { height: 100%; background: var(--accent); border-radius: 30px; transition: width 0.25s ease; }
 
-        /* ── Badge ──────────────────────────────────────── */
-        .badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 600; }
-        .badge-green  { background: var(--accent-light); color: var(--accent2); }
-        .badge-orange { background: #fff3e0; color: #e67e22; }
-        .badge-blue   { background: #e3f2fd; color: #1565c0; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 40px; font-size: 11px; font-weight: 500; }
+        .badge-green  { background: var(--success-light); color: var(--success); }
+        .badge-orange { background: #FEF3E2; color: var(--warning); }
+        .badge-blue   { background: var(--accent-light); color: var(--accent-dark); }
 
-        /* ── Calendar ───────────────────────────────────── */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; margin-top: 12px; }
         .cal-day-name { text-align: center; font-size: 11px; font-weight: 600; color: var(--muted); padding: 5px 0; }
-        .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 12px; border-radius: 40px; background: var(--bg); }
-        .cal-cell.has-read { background: var(--accent-light); color: var(--accent2); font-weight: 700; }
-        .cal-cell.today { border: 2px solid var(--accent); font-weight: 800; }
+        .cal-cell { 
+            aspect-ratio: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 12px; 
+            border-radius: 40px; 
+            background: var(--bg);
+            color: var(--text);
+        }
+        .cal-cell.has-read { background: var(--accent-light); color: var(--accent-dark); font-weight: 600; }
+        .cal-cell.today { border: 2px solid var(--accent); font-weight: 700; }
         .cal-cell.empty { background: transparent; }
 
-        /* ── Edition Card ───────────────────────────────── */
         .edition-card {
             display: flex;
             align-items: center;
             gap: 12px;
             padding: 12px;
             border: 1.5px solid var(--border);
-            border-radius: 16px;
+            border-radius: 14px;
             background: var(--bg);
             width: 100%;
             text-align: left;
             margin-bottom: 8px;
             cursor: pointer;
             font-family: inherit;
-            transition: all 0.15s;
+            transition: var(--transition);
         }
         .edition-card:active { transform: scale(0.98); }
         .edition-card.selected { border-color: var(--accent); background: var(--accent-light); }
         .edition-cover {
             width: 44px; height: 60px;
-            background: #d4e8d4;
+            background: var(--border);
             border-radius: 8px;
             display: flex; align-items: center; justify-content: center;
             font-size: 26px;
@@ -228,26 +293,16 @@
             background: white;
         }
 
-        /* ── Manual Section ─────────────────────────────── */
         .manual-section {
             background: var(--bg);
             border: 1.5px dashed var(--border);
-            border-radius: 16px;
+            border-radius: 14px;
             padding: 14px;
             margin-top: 4px;
             transition: border-color 0.2s;
         }
         .manual-section:focus-within { border-color: var(--accent); }
-        .manual-section-label {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--muted);
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            margin-bottom: 10px;
-        }
 
-        /* ── Author Autocomplete ────────────────────────── */
         .author-input-wrap { position: relative; }
         .author-suggestions {
             position: absolute;
@@ -256,7 +311,7 @@
             background: var(--surface);
             border: 1.5px solid var(--accent);
             border-radius: 14px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            box-shadow: var(--shadow-md);
             z-index: 500;
             overflow: hidden;
             display: none;
@@ -275,31 +330,17 @@
         .author-suggestion-item:last-child { border-bottom: none; }
         .author-suggestion-item:active,
         .author-suggestion-item:hover { background: var(--accent-light); }
-        .author-suggestion-icon { font-size: 18px; flex-shrink: 0; }
-        .author-suggestion-name { font-weight: 500; }
-        .author-suggestion-books { font-size: 11px; color: var(--muted); }
-        .author-loader-wrap {
-            padding: 12px 14px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 13px;
-            color: var(--muted);
-        }
 
-        /* ── Status ─────────────────────────────────────── */
         .status-msg { font-size: 12px; padding: 5px 0; color: var(--muted); min-height: 22px; }
-        .status-msg.ok  { color: var(--accent); }
+        .status-msg.ok  { color: var(--success); }
         .status-msg.err { color: var(--danger); }
 
-        /* ── Loader ─────────────────────────────────────── */
         .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ── Modal ──────────────────────────────────────── */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(4px);
             display: flex; align-items: center; justify-content: center;
             z-index: 1000;
@@ -313,15 +354,21 @@
             max-height: 85vh;
             overflow-y: auto;
             padding: 22px;
+            border: 1px solid var(--border);
         }
 
-        /* ── Finished Book Row ──────────────────────────── */
-        .finished-book { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--bg); border-radius: 16px; margin-bottom: 8px; }
+        .finished-book { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 12px; 
+            background: var(--bg); 
+            border-radius: 14px; 
+            margin-bottom: 8px;
+        }
 
-        /* ── Chart ──────────────────────────────────────── */
         .chart-container { position: relative; height: 200px; width: 100%; margin-top: 8px; }
 
-        /* ── Book List ──────────────────────────────────── */
         .mobile-book-list { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
         .mobile-book-item {
             background: var(--surface);
@@ -332,17 +379,27 @@
             align-items: center;
             gap: 12px;
             cursor: pointer;
-            transition: all 0.15s;
+            transition: var(--transition);
         }
         .mobile-book-item:active { transform: scale(0.98); }
         .mobile-book-item.active { background: var(--accent-light); border-color: var(--accent); }
-        .book-thumb-mob { width: 44px; height: 58px; background: var(--accent-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 28px; overflow: hidden; flex-shrink: 0; }
+        .book-thumb-mob { 
+            width: 44px; 
+            height: 58px; 
+            background: var(--accent-light); 
+            border-radius: 8px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 28px; 
+            overflow: hidden; 
+            flex-shrink: 0; 
+        }
         .book-thumb-mob img { width: 100%; height: 100%; object-fit: cover; }
         .book-info-mob { flex: 1; min-width: 0; }
         .book-title-mob { font-weight: 600; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .book-progress-mob { font-size: 12px; color: var(--muted); margin-top: 2px; }
 
-        /* Divider */
         .divider {
             display: flex; align-items: center; gap: 10px;
             color: var(--muted); font-size: 12px;
@@ -353,132 +410,121 @@
 </head>
 <body>
 
-<!-- HEADER -->
-<div class="header">
-    <h1>📖 Kitap Sayacı</h1>
-    <div id="header-date" class="header-date"></div>
-</div>
+<div class="app-container">
+    <div class="header">
+        <h1>📖 Kitap Sayacı</h1>
+        <div id="header-date" class="header-date"></div>
+    </div>
 
-<div class="layout">
-    <div class="content">
+    <div class="layout">
+        <div class="content">
 
-        <!-- ── Panel: Yeni Kitap ──────────────────────── -->
-        <div id="panel-add" class="panel active">
-            <h2 class="section-title">➕ Yeni Kitap</h2>
+            <div id="panel-add" class="panel active">
+                <h2 class="section-title">Yeni Kitap</h2>
 
-            <div class="card">
-                <div class="card-title">📖 Kitap Ara</div>
-                <div class="form-group">
-                    <label>Kitap Adı</label>
-                    <div class="flex-row">
-                        <input type="text" id="new-book-title" placeholder="Örn: Simyacı, 1984…" style="flex:1" autocomplete="off">
-                        <button class="btn btn-primary btn-sm" id="search-btn">
-                            <span id="search-btn-txt">🔍</span>
-                            <span id="search-loader" class="loader" style="display:none"></span>
-                        </button>
-                    </div>
-                </div>
-                <div id="search-status" class="status-msg"></div>
-
-                <!-- Baskı + Manuel Bölümü -->
-                <div id="edition-section" style="display:none">
-                    <div class="card-title">📚 Baskı Seç</div>
-                    <div id="edition-list"></div>
-
-                    <div class="divider">veya manuel giriş</div>
-
-                    <!-- Manuel Bölüm -->
-                    <div class="manual-section" id="manual-section">
-                        <div class="manual-section-label">✏️ Baskım listede yok</div>
-
-                        <!-- Sayfa Sayısı -->
-                        <div class="form-group" style="margin-bottom:12px">
-                            <label>Sayfa Sayısı</label>
-                            <input type="number" id="manual-page-override" placeholder="Örn: 384" min="1" autocomplete="off">
+                <div class="card">
+                    <div class="card-title">📖 Kitap Ara</div>
+                    <div class="form-group">
+                        <label>Kitap Adı</label>
+                        <div class="flex-row">
+                            <input type="text" id="new-book-title" placeholder="Örn: Simyacı, 1984…" style="flex:1" autocomplete="off">
+                            <button class="btn btn-primary btn-sm" id="search-btn">
+                                <span id="search-btn-txt">🔍</span>
+                                <span id="search-loader" class="loader" style="display:none"></span>
+                            </button>
                         </div>
+                    </div>
+                    <div id="search-status" class="status-msg"></div>
 
-                        <!-- Yazar - Autocomplete -->
-                        <div class="form-group" style="margin-bottom:0">
-                            <label>Yazar <span style="color:var(--muted);font-weight:400">(opsiyonel)</span></label>
-                            <div class="author-input-wrap">
-                                <input
-                                    type="text"
-                                    id="manual-author-input"
-                                    placeholder="Yazar adı yaz, öneriler gelecek…"
-                                    autocomplete="off"
-                                    spellcheck="false"
-                                >
-                                <div class="author-suggestions" id="author-suggestions"></div>
+                    <div id="edition-section" style="display:none">
+                        <div class="card-title">Baskı Seç</div>
+                        <div id="edition-list"></div>
+
+                        <div class="divider">veya manuel giriş</div>
+
+                        <div class="manual-section" id="manual-section">
+                            <div class="manual-section-label">Baskım listede yok</div>
+
+                            <div class="form-group" style="margin-bottom:12px">
+                                <label>Sayfa Sayısı</label>
+                                <input type="number" id="manual-page-override" placeholder="Örn: 384" min="1" autocomplete="off">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>Yazar <span style="color:var(--muted);font-weight:400">(opsiyonel)</span></label>
+                                <div class="author-input-wrap">
+                                    <input
+                                        type="text"
+                                        id="manual-author-input"
+                                        placeholder="Yazar adı yaz, öneriler gelecek…"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                    >
+                                    <div class="author-suggestions" id="author-suggestions"></div>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div style="display:flex;gap:10px;margin-top:16px">
-                        <button class="btn btn-primary" id="confirm-edition-btn" style="flex:1">Devam Et ›</button>
-                        <button class="btn btn-outline btn-sm" id="cancel-edition-btn">İptal</button>
+                        <div style="display:flex;gap:10px;margin-top:16px">
+                            <button class="btn btn-primary" id="confirm-edition-btn" style="flex:1">Devam Et ›</button>
+                            <button class="btn btn-outline btn-sm" id="cancel-edition-btn">İptal</button>
+                        </div>
                     </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📚 Kitaplarım</div>
+                    <div id="sidebar-books-list-mobile" class="mobile-book-list"></div>
                 </div>
             </div>
 
-            <!-- Kitap Listesi -->
-            <div class="card">
-                <div class="card-title">📚 Kitaplarım</div>
-                <div id="sidebar-books-list-mobile" class="mobile-book-list"></div>
-            </div>
-        </div>
-
-        <!-- ── Panel: Profil ──────────────────────────── -->
-        <div id="panel-profile" class="panel">
-            <h2 class="section-title">👤 Profilim</h2>
-            <div class="grid-3" style="margin-bottom:16px">
-                <div class="metric"><div class="metric-val" id="stat-total-books">0</div><div class="metric-lbl">Aktif Kitap</div></div>
-                <div class="metric"><div class="metric-val" id="stat-finished">0</div><div class="metric-lbl">Bitirilen</div></div>
-                <div class="metric"><div class="metric-val" id="stat-total-pages">0</div><div class="metric-lbl">Okunan Sayfa</div></div>
-            </div>
-            <div class="card">
-                <div class="card-title">📊 Haftalık Ortalama (sayfa/gün)</div>
-                <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-title">📈 Aylık Ortalama</div>
-                <div class="chart-container"><canvas id="chart-monthly"></canvas></div>
-            </div>
-            <div class="card">
-                <div class="card-title">✅ Bitirilen Kitaplar</div>
-                <div class="flex-row" style="margin-bottom:12px">
-                    <input id="finished-input" placeholder="Kitap adı ara…" style="flex:1" autocomplete="off">
-                    <button class="btn btn-primary btn-sm" id="add-finished-btn">
-                        <span id="fin-btn-txt">+ Ekle</span>
-                        <span id="fin-loader" class="loader" style="display:none"></span>
-                    </button>
+            <div id="panel-profile" class="panel">
+                <h2 class="section-title">Profilim</h2>
+                <div class="grid-3" style="margin-bottom:16px">
+                    <div class="metric"><div class="metric-val" id="stat-total-books">0</div><div class="metric-lbl">Aktif Kitap</div></div>
+                    <div class="metric"><div class="metric-val" id="stat-finished">0</div><div class="metric-lbl">Bitirilen</div></div>
+                    <div class="metric"><div class="metric-val" id="stat-total-pages">0</div><div class="metric-lbl">Okunan Sayfa</div></div>
                 </div>
-                <div id="fin-status" class="status-msg"></div>
-                <div id="finished-list"></div>
+                <div class="card">
+                    <div class="card-title">📊 Haftalık Ortalama (sayfa/gün)</div>
+                    <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📈 Aylık Ortalama</div>
+                    <div class="chart-container"><canvas id="chart-monthly"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">✅ Bitirilen Kitaplar</div>
+                    <div class="flex-row" style="margin-bottom:12px">
+                        <input id="finished-input" placeholder="Kitap adı ara…" style="flex:1" autocomplete="off">
+                        <button class="btn btn-primary btn-sm" id="add-finished-btn">
+                            <span id="fin-btn-txt">+ Ekle</span>
+                            <span id="fin-loader" class="loader" style="display:none"></span>
+                        </button>
+                    </div>
+                    <div id="fin-status" class="status-msg"></div>
+                    <div id="finished-list"></div>
+                </div>
             </div>
+
+            <div id="panel-book-detail" class="panel"></div>
+
         </div>
+    </div>
 
-        <!-- ── Panel: Kitap Detay ─────────────────────── -->
-        <div id="panel-book-detail" class="panel"></div>
-
+    <div class="bottom-tab-bar">
+        <button class="mobile-tab-btn active" data-panel="panel-add">
+            <span class="tab-icon">➕</span><span>Yeni</span>
+        </button>
+        <button class="mobile-tab-btn" data-panel="panel-profile">
+            <span class="tab-icon">👤</span><span>Profil</span>
+        </button>
+        <button class="mobile-tab-btn" data-panel="panel-book-detail" id="book-detail-tab" style="display:none">
+            <span class="tab-icon">📘</span><span>Kitap</span>
+        </button>
     </div>
 </div>
 
-<!-- BOTTOM TAB BAR -->
-<div class="bottom-tab-bar">
-    <button class="mobile-tab-btn active" data-panel="panel-add">
-        <span class="tab-icon">➕</span><span>Yeni</span>
-    </button>
-    <button class="mobile-tab-btn" data-panel="panel-profile">
-        <span class="tab-icon">👤</span><span>Profil</span>
-    </button>
-    <button class="mobile-tab-btn" data-panel="panel-book-detail" id="book-detail-tab" style="display:none">
-        <span class="tab-icon">📘</span><span>Kitap</span>
-    </button>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════════════ -->
 <script>
 'use strict';
 
@@ -518,6 +564,15 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;');
 }
 
+function toTitleCase(str) {
+    if (!str) return '';
+    return String(str).replace(/\S+/g, word => {
+        const first = word[0];
+        const upper = first === 'i' ? 'İ' : first.toLocaleUpperCase('tr-TR');
+        return upper + word.slice(1);
+    });
+}
+
 function getWeekNumber(dateStr) {
     const d = new Date(dateStr);
     const jan4 = new Date(d.getFullYear(), 0, 4);
@@ -548,8 +603,6 @@ function setLoading(btnTxtId, loaderId, btnId, isLoading) {
 /* ════════════════════════════════════════════════════════════
    3. GOOGLE BOOKS API
 ════════════════════════════════════════════════════════════ */
-
-/** Baskıları getir */
 async function fetchEditions(titleQuery) {
     const url = `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(titleQuery)}&maxResults=8&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/pageCount,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/language,volumeInfo/categories,volumeInfo/description,volumeInfo/imageLinks)`;
     const res = await fetch(url);
@@ -583,11 +636,6 @@ async function fetchEditions(titleQuery) {
     return editions;
 }
 
-/**
- * Yazar önerileri: kitap adını intr: ile ara, yazarları topla ve birleştir.
- * Ayrı bir "author:" sorgusu da at, sonuçları birleştir.
- * Döner: [{ name, bookCount, sampleBook }]
- */
 async function fetchAuthorSuggestions(authorQuery) {
     if (!authorQuery || authorQuery.trim().length < 2) return [];
 
@@ -599,13 +647,11 @@ async function fetchAuthorSuggestions(authorQuery) {
     const data = await res.json();
     if (!data.items) return [];
 
-    // Yazarları say ve biriktir
-    const authorMap = new Map(); // name -> { count, sampleBook }
+    const authorMap = new Map();
     for (const item of data.items) {
         const v = item.volumeInfo;
         if (!v.authors) continue;
         for (const author of v.authors) {
-            // Yalnızca sorguyla başlayanları göster (case-insensitive)
             if (!author.toLowerCase().includes(authorQuery.toLowerCase())) continue;
             if (!authorMap.has(author)) {
                 authorMap.set(author, { count: 0, sampleBook: v.title || '' });
@@ -614,7 +660,6 @@ async function fetchAuthorSuggestions(authorQuery) {
         }
     }
 
-    // Frekansa göre sırala
     return Array.from(authorMap.entries())
         .map(([name, info]) => ({ name, bookCount: info.count, sampleBook: info.sampleBook }))
         .sort((a, b) => b.bookCount - a.bookCount)
@@ -632,7 +677,6 @@ function initAuthorAutocomplete() {
     const box     = document.getElementById('author-suggestions');
     if (!input || !box) return;
 
-    // Kullanıcı yazarken debounce ile API çağır
     input.addEventListener('input', () => {
         const val = input.value.trim();
         clearTimeout(authorDebounceTimer);
@@ -641,7 +685,6 @@ function initAuthorAutocomplete() {
         if (val.length < 2) return;
 
         authorDebounceTimer = setTimeout(async () => {
-            // Loading göster
             box.innerHTML = `
                 <div class="author-loader-wrap">
                     <span class="loader"></span>
@@ -655,19 +698,32 @@ function initAuthorAutocomplete() {
             } catch(e) {
                 hideAuthorSuggestions();
             }
-        }, 350); // 350ms bekle — ne çok hızlı ne çok yavaş
+        }, 350);
     });
 
-    // Dışarı tıklayınca kapat
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            hideAuthorSuggestions();
+            return;
+        }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            if (authorSuggestionsVisible) {
+                const firstItem = box.querySelector('.author-suggestion-item');
+                if (firstItem) {
+                    input.value = firstItem.dataset.name;
+                    hideAuthorSuggestions();
+                }
+            } else {
+                document.getElementById('confirm-edition-btn')?.click();
+            }
+        }
+    });
+
     document.addEventListener('click', (e) => {
         if (!input.contains(e.target) && !box.contains(e.target)) {
             hideAuthorSuggestions();
         }
-    });
-
-    // Escape ile kapat
-    input.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') hideAuthorSuggestions();
     });
 }
 
@@ -676,7 +732,6 @@ function renderAuthorSuggestions(suggestions, rawQuery) {
     const box   = document.getElementById('author-suggestions');
 
     if (suggestions.length === 0) {
-        // Öneri yoksa yine de yazılanı kabul et — kutuyu kapat
         hideAuthorSuggestions();
         return;
     }
@@ -691,10 +746,8 @@ function renderAuthorSuggestions(suggestions, rawQuery) {
         </div>
     `).join('');
 
-    // Seçim
     box.querySelectorAll('.author-suggestion-item').forEach(item => {
         item.addEventListener('mousedown', (e) => {
-            // mousedown: blur'dan önce tetiklenir, input değerini korur
             e.preventDefault();
             const name = item.dataset.name;
             if (input) input.value = name;
@@ -705,7 +758,6 @@ function renderAuthorSuggestions(suggestions, rawQuery) {
     showAuthorSuggestions();
 }
 
-/** Sorguyla eşleşen kısmı bold yap */
 function highlightMatch(text, query) {
     if (!query) return escapeHtml(text);
     const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -778,19 +830,17 @@ function showEditionSection(editions) {
                     <div style="flex:1;min-width:0">
                         <div style="font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(ed.title)}</div>
                         <div style="font-size:11px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(meta)}</div>
-                        <div style="font-size:13px;font-weight:700;color:var(--accent2);margin-top:4px">${ed.pages > 0 ? ed.pages + ' sayfa' : '? sayfa'}</div>
+                        <div style="font-size:13px;font-weight:700;color:var(--accent);margin-top:4px">${ed.pages > 0 ? ed.pages + ' sayfa' : '? sayfa'}</div>
                     </div>
                     <div class="edition-radio"></div>
                 </button>`;
         }).join('');
 
-        // Seçim
         listDiv.querySelectorAll('.edition-card').forEach(card => {
             card.addEventListener('click', () => {
                 selectedEditionIdx = parseInt(card.dataset.idx);
                 listDiv.querySelectorAll('.edition-card').forEach(c => c.classList.remove('selected'));
                 card.classList.add('selected');
-                // Baskı seçildi → manuel alanları sıfırla (kullanıcı isterse doldurur)
                 document.getElementById('manual-page-override').value = '';
                 document.getElementById('manual-author-input').value  = '';
                 hideAuthorSuggestions();
@@ -799,6 +849,13 @@ function showEditionSection(editions) {
     }
 
     document.getElementById('edition-section').style.display = 'block';
+
+    document.getElementById('manual-page-override').onkeydown = (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('confirm-edition-btn')?.click();
+        }
+    };
 }
 
 function langLabel(code) {
@@ -807,15 +864,14 @@ function langLabel(code) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   6. DEVAM ET BUTONU — Baskı veya Manuel Bilgi Topla
+   6. DEVAM ET BUTONU
 ════════════════════════════════════════════════════════════ */
 document.getElementById('confirm-edition-btn').addEventListener('click', () => {
     const manualPages  = parseInt(document.getElementById('manual-page-override').value);
-    const manualAuthor = (document.getElementById('manual-author-input').value || '').trim();
+    const manualAuthor = toTitleCase((document.getElementById('manual-author-input').value || '').trim());
     const hasManualPages = !isNaN(manualPages) && manualPages > 0;
-    const bookTitle    = (document.getElementById('new-book-title').value || '').trim();
+    const bookTitle    = toTitleCase((document.getElementById('new-book-title').value || '').trim());
 
-    // Kural: ya baskı seçilmeli ya da manuel sayfa girilmeli
     if (selectedEditionIdx === -1 && !hasManualPages) {
         alert('Bir baskı seçin ya da sayfa sayısını kendiniz girin.');
         document.getElementById('manual-page-override').focus();
@@ -825,19 +881,16 @@ document.getElementById('confirm-edition-btn').addEventListener('click', () => {
     let bookInfo;
 
     if (hasManualPages) {
-        // Manuel sayfa → yazarı da manual'dan al
-        // Eğer baskı da seçildiyse onun bilgilerini taban al
         const base = selectedEditionIdx >= 0 ? foundEditions[selectedEditionIdx] : null;
         bookInfo = {
-            title:       base ? base.title       : bookTitle,
-            author:      manualAuthor || (base ? base.author : '') || 'Bilinmiyor',
+            title:       base ? toTitleCase(base.title)  : bookTitle,
+            author:      manualAuthor || toTitleCase(base ? base.author : '') || 'Bilinmiyor',
             pages:       manualPages,
             genre:       base ? base.genre       : 'Belirtilmemiş',
             description: base ? base.description : '',
             coverUrl:    base ? base.coverUrl    : '',
         };
     } else {
-        // Baskı seçildi, manuel sayfa girilmedi
         const ed = foundEditions[selectedEditionIdx];
         if (!ed.pages) {
             alert('Seçilen baskının sayfa sayısı bilinmiyor. Lütfen sayfa sayısını kendiniz girin.');
@@ -846,12 +899,11 @@ document.getElementById('confirm-edition-btn').addEventListener('click', () => {
         }
         bookInfo = {
             ...ed,
-            // Kullanıcı yazar kutusuna bir şey yazdıysa onu tercih et
-            author: manualAuthor || ed.author || 'Bilinmiyor',
+            title:  toTitleCase(ed.title),
+            author: manualAuthor || toTitleCase(ed.author) || 'Bilinmiyor',
         };
     }
 
-    // Temizlik
     document.getElementById('edition-section').style.display = 'none';
     document.getElementById('manual-page-override').value    = '';
     document.getElementById('manual-author-input').value     = '';
@@ -875,7 +927,17 @@ document.getElementById('cancel-edition-btn').addEventListener('click', () => {
 });
 
 document.getElementById('search-btn').addEventListener('click', searchBook);
-document.getElementById('new-book-title').addEventListener('keypress', e => { if (e.key === 'Enter') searchBook(); });
+
+document.getElementById('new-book-title').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        if (document.getElementById('edition-section').style.display !== 'none') {
+            document.getElementById('confirm-edition-btn')?.click();
+        } else {
+            searchBook();
+        }
+    }
+});
 
 /* ════════════════════════════════════════════════════════════
    7. KİTAP BAŞLATMA MODALI
@@ -894,8 +956,8 @@ function showStartModal(bookInfo) {
                 ${escapeHtml(bookInfo.author)}${bookInfo.pages ? ' · ' + bookInfo.pages + ' sayfa' : ''}
             </p>
             <div style="display:flex;gap:10px;margin-bottom:16px">
-                <button id="modal-new" class="btn btn-primary" style="flex:1">🆕 Yeni başlıyorum</button>
-                <button id="modal-continue" class="btn btn-outline" style="flex:1">📑 Devam ediyorum</button>
+                <button id="modal-new" class="btn btn-primary" style="flex:1">Yeni başlıyorum</button>
+                <button id="modal-continue" class="btn btn-outline" style="flex:1">Devam ediyorum</button>
             </div>
             <div id="modal-page-row" style="display:none;margin-bottom:18px">
                 <label style="font-size:13px;font-weight:500;color:var(--muted);display:block;margin-bottom:6px">Hangi sayfadasınız?</label>
@@ -909,12 +971,12 @@ function showStartModal(bookInfo) {
     document.body.appendChild(modal);
 
     let mode = 'new';
-    document.getElementById('modal-new').style.background = 'var(--accent2)';
+    document.getElementById('modal-new').style.background = 'var(--accent)';
 
     document.getElementById('modal-new').onclick = () => {
         mode = 'new';
         document.getElementById('modal-page-row').style.display = 'none';
-        document.getElementById('modal-new').style.background = 'var(--accent2)';
+        document.getElementById('modal-new').style.background = 'var(--accent)';
         document.getElementById('modal-continue').style.background = 'transparent';
     };
     document.getElementById('modal-continue').onclick = () => {
@@ -939,10 +1001,14 @@ function showStartModal(bookInfo) {
         modal.remove();
         createBook({ ...bookInfo, startPage });
     };
-    document.getElementById('modal-page-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') document.getElementById('modal-confirm').click();
+
+    document.getElementById('modal-page-input')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('modal-confirm').click();
+        }
     });
-    // Overlay tıklayınca kapat
+
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 }
 
@@ -952,8 +1018,8 @@ function showStartModal(bookInfo) {
 function createBook(info) {
     const newBook = {
         id:          genId(),
-        title:       info.title,
-        author:      info.author || 'Bilinmiyor',
+        title:       toTitleCase(info.title),
+        author:      toTitleCase(info.author || 'Bilinmiyor'),
         totalPages:  info.pages  || 0,
         genre:       info.genre  || 'Belirtilmemiş',
         description: info.description || '',
@@ -1019,7 +1085,7 @@ function recalcAverages(book) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   10. KİTAP LİSTESİ (SIDEBAR)
+   10. KİTAP LİSTESİ
 ════════════════════════════════════════════════════════════ */
 let activeBookId = null;
 
@@ -1085,7 +1151,7 @@ function renderBookDetail(book) {
                         <span class="badge badge-green">${escapeHtml(book.genre)}</span>
                         ${book.totalPages ? `<span class="badge badge-orange">${book.totalPages} sayfa</span>` : ''}
                         <span class="badge badge-blue">%${pct}</span>
-                        ${book.startPage > 0 ? `<span class="badge" style="background:#f3e8ff;color:#7c3aed">📑 ${book.startPage}. sayfadan</span>` : ''}
+                        ${book.startPage > 0 ? `<span class="badge" style="background:var(--accent2-light);color:var(--accent2)">📑 ${book.startPage}. sayfadan</span>` : ''}
                     </div>
                 </div>
                 <button onclick="deleteBook('${book.id}')"
@@ -1108,7 +1174,7 @@ function renderBookDetail(book) {
             <div class="card-title">📝 Bugün Okunan</div>
             <div class="flex-row">
                 <input id="pages-input" type="number" placeholder="Sayfa sayısı" style="flex:1" autocomplete="off" min="1">
-                <button class="btn btn-primary" onclick="logPages('${book.id}')">Kaydet</button>
+                <button class="btn btn-primary" id="log-pages-btn" onclick="logPages('${book.id}')">Kaydet</button>
             </div>
             <div id="log-status" class="status-msg"></div>
         </div>
@@ -1129,8 +1195,11 @@ function renderBookDetail(book) {
             <div id="calendar-${book.id}"></div>
         </div>`;
 
-    document.getElementById('pages-input')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') logPages(book.id);
+    document.getElementById('pages-input')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            logPages(book.id);
+        }
     });
 
     renderBookChart(book.id);
@@ -1184,7 +1253,7 @@ function renderBookChart(bookId) {
         const ds = d.toISOString().split('T')[0];
         const p  = book.readLog[ds] || 0;
         data.push(p);
-        colors.push(d.toDateString() === today.toDateString() ? '#1b4332' : '#52b788');
+        colors.push(d.toDateString() === today.toDateString() ? '#B76E2E' : '#D4A574');
     }
 
     const key = `chart_${bookId}`;
@@ -1212,7 +1281,6 @@ function renderBookChart(bookId) {
 let weeklyChart = null, monthlyChart = null;
 
 function renderProfileCharts() {
-    // Haftalık
     const weeklyData = {};
     STATE.books.forEach(b => {
         Object.entries(b.readLog).forEach(([date, pages]) => {
@@ -1234,11 +1302,11 @@ function renderProfileCharts() {
                 datasets: [{
                     label: 'Ort. Sayfa/Gün',
                     data: wData.length ? wData : [0],
-                    borderColor: '#2d6a4f',
-                    backgroundColor: 'rgba(45,106,79,0.1)',
+                    borderColor: '#B76E2E',
+                    backgroundColor: 'rgba(183,110,46,0.1)',
                     tension: 0.3,
                     fill: true,
-                    pointBackgroundColor: '#1b4332',
+                    pointBackgroundColor: '#8B6B4A',
                     pointRadius: 4,
                 }]
             },
@@ -1246,7 +1314,6 @@ function renderProfileCharts() {
         });
     }
 
-    // Aylık
     const monthlyData = {};
     STATE.books.forEach(b => {
         Object.entries(b.monthlyAvgs || {}).forEach(([mk, avg]) => {
@@ -1265,7 +1332,7 @@ function renderProfileCharts() {
             type: 'bar',
             data: {
                 labels: months.length ? months.map(mk => { const [y, m] = mk.split('-'); return `${TR_M[parseInt(m)-1]} ${y.slice(2)}`; }) : ['Veri yok'],
-                datasets: [{ label: 'Ort. Sayfa/Gün', data: mData.length ? mData : [0], backgroundColor: '#52b788', borderRadius: 6 }]
+                datasets: [{ label: 'Ort. Sayfa/Gün', data: mData.length ? mData : [0], backgroundColor: '#8B6B4A', borderRadius: 6 }]
             },
             options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
         });
@@ -1347,10 +1414,10 @@ window.removeFinishedBook = function(idx) {
 };
 
 /* ════════════════════════════════════════════════════════════
-   16. BİTİRİLEN KİTAP — Baskı Modalı
+   16. BİTİRİLEN KİTAP
 ════════════════════════════════════════════════════════════ */
 async function addFinishedBook() {
-    const val = (document.getElementById('finished-input').value || '').trim();
+    const val = toTitleCase((document.getElementById('finished-input').value || '').trim());
     if (!val) return;
 
     setLoading('fin-btn-txt', 'fin-loader', 'add-finished-btn', true);
@@ -1375,9 +1442,9 @@ function showFinishedModal(bookName, editions) {
         <button class="edition-card" data-idx="${i}">
             <div class="edition-cover">${ed.coverUrl ? `<img src="${escapeHtml(ed.coverUrl)}" onerror="this.parentElement.innerHTML='📖'">` : '📖'}</div>
             <div style="flex:1;min-width:0">
-                <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(ed.title)}</div>
-                <div style="font-size:11px;color:var(--muted)">${escapeHtml(ed.author)}${ed.year ? ' · ' + ed.year : ''}</div>
-                <div style="font-size:13px;font-weight:700;color:var(--accent2)">${ed.pages > 0 ? ed.pages + ' sayfa' : '? sayfa'}</div>
+                <div style="font-weight:600;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(toTitleCase(ed.title))}</div>
+                <div style="font-size:11px;color:var(--muted)">${escapeHtml(toTitleCase(ed.author))}${ed.year ? ' · ' + ed.year : ''}</div>
+                <div style="font-size:13px;font-weight:700;color:var(--accent)">${ed.pages > 0 ? ed.pages + ' sayfa' : '? sayfa'}</div>
             </div>
             <div class="edition-radio"></div>
         </button>`).join('');
@@ -1411,7 +1478,7 @@ function showFinishedModal(bookName, editions) {
     document.getElementById('modalFinCancel').onclick = () => modal.remove();
     modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
 
-    document.getElementById('modalFinOk').onclick = () => {
+    const finOk = () => {
         const manual = parseInt(document.getElementById('manualPagesFin').value);
         let pages = 0;
         if (!isNaN(manual) && manual > 0)  pages = manual;
@@ -1421,7 +1488,7 @@ function showFinishedModal(bookName, editions) {
             alert('Lütfen bir baskı seçin ya da sayfa sayısını girin.');
             return;
         }
-        STATE.finishedBooks.push({ name: bookName, pages });
+        STATE.finishedBooks.push({ name: toTitleCase(bookName), pages });
         saveState();
         updateProfileStats();
         modal.remove();
@@ -1429,13 +1496,24 @@ function showFinishedModal(bookName, editions) {
         showStatus('fin-status', `✓ "${escapeHtml(bookName)}" eklendi — ${pages} sayfa.`, 'ok');
     };
 
-    document.getElementById('manualPagesFin')?.addEventListener('keypress', e => {
-        if (e.key === 'Enter') document.getElementById('modalFinOk').click();
+    document.getElementById('modalFinOk').onclick = finOk;
+
+    document.getElementById('manualPagesFin')?.addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            finOk();
+        }
     });
 }
 
 document.getElementById('add-finished-btn').addEventListener('click', addFinishedBook);
-document.getElementById('finished-input').addEventListener('keypress', e => { if (e.key === 'Enter') addFinishedBook(); });
+
+document.getElementById('finished-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        addFinishedBook();
+    }
+});
 
 /* ════════════════════════════════════════════════════════════
    17. PANEL GEÇİŞİ
@@ -1461,7 +1539,6 @@ function initTabs() {
    18. BAŞLATMA
 ════════════════════════════════════════════════════════════ */
 (function init() {
-    // Tarih
     document.getElementById('header-date').textContent =
         new Date().toLocaleDateString('tr-TR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
