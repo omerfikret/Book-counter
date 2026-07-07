@@ -1,11 +1,14 @@
 'use strict';
 
-// 🔑 Google Books API Anahtarını buraya yapıştır
-const API_KEY = 'AIzaSyC-xJlc-Rs7iGsHwuEdJ14toHAKiY7HKwY'; 
+// ✅ Artık anahtar yok. Tarayıcı sadece kendi sitendeki
+// /.netlify/functions/books endpoint'ine istek atıyor.
+// Gerçek Google Books isteği + anahtar, Netlify Function içinde (sunucu tarafında) çalışıyor.
+
+const FUNCTION_URL = '/.netlify/functions/books';
 
 async function fetchEditions(titleQuery) {
-    const url = `https://www.googleapis.com/books/v1/volumes?q=intitle:${encodeURIComponent(titleQuery)}&maxResults=8&fields=items(volumeInfo/title,volumeInfo/authors,volumeInfo/pageCount,volumeInfo/publisher,volumeInfo/publishedDate,volumeInfo/language,volumeInfo/categories,volumeInfo/description,volumeInfo/imageLinks)&key=${API_KEY}`;
-    
+    const url = `${FUNCTION_URL}?mode=editions&q=${encodeURIComponent(titleQuery)}`;
+
     try {
         const res = await fetch(url);
         if (!res.ok) {
@@ -48,8 +51,7 @@ async function fetchEditions(titleQuery) {
 async function fetchAuthorSuggestions(authorQuery) {
     if (!authorQuery || authorQuery.trim().length < 2) return [];
 
-    const q = encodeURIComponent(authorQuery.trim());
-    const url = `https://www.googleapis.com/books/v1/volumes?q=inauthor:${q}&maxResults=10&fields=items(volumeInfo/authors,volumeInfo/title)&key=${API_KEY}`;
+    const url = `${FUNCTION_URL}?mode=authors&q=${encodeURIComponent(authorQuery.trim())}`;
 
     try {
         const res = await fetch(url);
