@@ -1,0 +1,29 @@
+/* ============================================================
+   VARIABLES & GLOBAL RESET
+   ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            --bg: #F5F2EB;           /* Klasik kitap kağıdı tonu */
+            --surface: #FFFFFF;
+            --surface-secondary: #FCFAF5;
+            --border: #E6E0D5;
+            --text: #2C2A29;
+            --text-light: #5B5A59;
+            --muted: #8A8681;
+            --accent: #B76E2E;       /* Sıcak klasik kahve / deri tonu */
+            --accent-light: #FDF6EC;
+            --accent-dark: #9B5A24;
+            --accent2: #8B6B4A;      /* Yardımcı toprak tonu */
+            --accent2-light: #F5EFE6;
+            --success: #2D6A4F;
+            --success-light: #E8F3EE;
+            --warning: #E67E22;
+            --danger: #C0392B;
+            --radius: 16px;
+            --radius-sm: 12px;
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --transition: all 0.2s ease;
+            --anacerceve: none;
+        }
