@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <title>Kitap Okuma Sayacı</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Üçüncü parti kütüphane -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- CSS modülleri -->
+    <link rel="stylesheet" href="css/variables.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/layout.css">
+    <link rel="stylesheet" href="css/forms-buttons.css">
+    <link rel="stylesheet" href="css/cards-metrics.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/autocomplete.css">
+    <link rel="stylesheet" href="css/status-loader.css">
+    <link rel="stylesheet" href="css/book-list.css">
+</head>
+<body>
+
+<div class="app-container">
+    <div class="header">
+        <h1>📖 Kitap Sayacı</h1>
+        <div id="header-date" class="header-date"></div>
+    </div>
+
+    <div class="layout">
+        <div class="content">
+
+            <div id="panel-add" class="panel active">
+                <h2 class="section-title">Yeni Kitap</h2>
+
+                <div class="card">
+                    <div class="card-title">📖 Kitap Ara</div>
+                    <div class="form-group">
+                        <label>Kitap Adı</label>
+                        <div class="flex-row">
+                            <input type="text" id="new-book-title" placeholder="Örn: Simyacı, 1984…" style="flex:1" autocomplete="off">
+                            <button class="btn btn-primary btn-sm" id="search-btn">
+                                <span id="search-btn-txt">🔍</span>
+                                <span id="search-loader" class="loader" style="display:none"></span>
+                            </button>
+                        </div>
+                    </div>
+                    <div id="search-status" class="status-msg"></div>
+
+                    <div id="edition-section" style="display:none">
+                        <div class="card-title">Baskı Seç</div>
+                        <div id="edition-list"></div>
+
+                        <div class="divider">veya manuel giriş</div>
+
+                        <div class="manual-section" id="manual-section">
+                            <div class="manual-section-label">Baskım listede yok</div>
+
+                            <div class="form-group" style="margin-bottom:12px">
+                                <label>Sayfa Sayısı</label>
+                                <input type="number" id="manual-page-override" placeholder="Örn: 384" min="1" autocomplete="off">
+                            </div>
+
+                            <div class="form-group" style="margin-bottom:0">
+                                <label>Yazar <span style="color:var(--muted);font-weight:400">(opsiyonel)</span></label>
+                                <div class="author-input-wrap">
+                                    <input
+                                        type="text"
+                                        id="manual-author-input"
+                                        placeholder="Yazar adı yaz, öneriler gelecek…"
+                                        autocomplete="off"
+                                        spellcheck="false"
+                                    >
+                                    <div class="author-suggestions" id="author-suggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div style="display:flex;gap:10px;margin-top:16px">
+                            <button class="btn btn-primary" id="confirm-edition-btn" style="flex:1">Devam Et ›</button>
+                            <button class="btn btn-outline btn-sm" id="cancel-edition-btn">İptal</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📚 Kitaplarım</div>
+                    <div id="sidebar-books-list-mobile" class="mobile-book-list"></div>
+                </div>
+            </div>
+
+            <div id="panel-profile" class="panel">
+                <h2 class="section-title">Profilim</h2>
+                <div class="grid-3" style="margin-bottom:16px">
+                    <div class="metric"><div class="metric-val" id="stat-total-books">0</div><div class="metric-lbl">Aktif Kitap</div></div>
+                    <div class="metric"><div class="metric-val" id="stat-finished">0</div><div class="metric-lbl">Bitirilen</div></div>
+                    <div class="metric"><div class="metric-val" id="stat-total-pages">0</div><div class="metric-lbl">Okunan Sayfa</div></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📊 Haftalık Ortalama (sayfa/gün)</div>
+                    <div class="chart-container"><canvas id="chart-weekly"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">📈 Aylık Ortalama</div>
+                    <div class="chart-container"><canvas id="chart-monthly"></canvas></div>
+                </div>
+                <div class="card">
+                    <div class="card-title">✅ Bitirilen Kitaplar</div>
+                    <div class="flex-row" style="margin-bottom:12px">
+                        <input id="finished-input" placeholder="Kitap adı ara…" style="flex:1" autocomplete="off">
+                        <button class="btn btn-primary btn-sm" id="add-finished-btn">
+                            <span id="fin-btn-txt">+ Ekle</span>
+                            <span id="fin-loader" class="loader" style="display:none"></span>
+                        </button>
+                    </div>
+                    <div id="fin-status" class="status-msg"></div>
+                    <div id="finished-list"></div>
+                </div>
+            </div>
+
+            <div id="panel-book-detail" class="panel"></div>
+
+        </div>
+    </div>
+
+    <div class="bottom-tab-bar">
+        <button class="mobile-tab-btn active" data-panel="panel-add">
+            <span class="tab-icon">➕</span><span>Yeni</span>
+        </button>
+        <button class="mobile-tab-btn" data-panel="panel-profile">
+            <span class="tab-icon">👤</span><span>Profil</span>
+        </button>
+        <button class="mobile-tab-btn" data-panel="panel-book-detail" id="book-detail-tab" style="display:none">
+            <span class="tab-icon">📘</span><span>Kitap</span>
+        </button>
+    </div>
+</div>
+
+<!-- TÜM script'ler NORMAL olarak yüklenir (module yok!) -->
+<script src="js/03-google-books-api.js"></script>
+<script src="js/01-state.js"></script>
+<script src="js/02-utils.js"></script>
+<script src="js/04-author-autocomplete.js"></script>
+<script src="js/05-book-search.js"></script>
+<script src="js/06-continue-reading.js"></script>
+<script src="js/07-start-book-modal.js"></script>
+<script src="js/08-book-crud.js"></script>
+<script src="js/09-averages.js"></script>
+<script src="js/10-book-list.js"></script>
+<script src="js/11-book-detail.js"></script>
+<script src="js/12-page-save.js"></script>
+<script src="js/13-charts.js"></script>
+<script src="js/14-calendar.js"></script>
+<script src="js/15-profile.js"></script>
+<script src="js/16-finished-book.js"></script>
+<script src="js/17-tabs.js"></script>
+<script src="js/18-main.js"></script>
+</body>
+</html>
