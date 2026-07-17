@@ -4,12 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
     <title>Kitap Okuma Sayacı</title>
-    <link rel="icon" type="image/png" href="x-removebg-preview.png">
+    <link rel="icon" type="image/png" href="favicon.png">
+
+    <!-- Üçüncü parti kütüphane -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- CSS modülleri -->
+    <link rel="stylesheet" href="css/variables.css">
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/pages.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="css/forms-buttons.css">
+    <link rel="stylesheet" href="css/cards-metrics.css">
+    <link rel="stylesheet" href="css/calendar.css">
+    <link rel="stylesheet" href="css/modal.css">
+    <link rel="stylesheet" href="css/autocomplete.css">
+    <link rel="stylesheet" href="css/status-loader.css">
+    <link rel="stylesheet" href="css/book-list.css">
 </head>
 <body>
 
@@ -128,15 +138,24 @@
     </div>
 </div>
 
-<script src="js/state.js"></script>
-<script src="js/utils.js"></script>
-<script src="js/api.js"></script>
-<script src="js/author.js"></script>
-<script src="js/search.js"></script>
-<script src="js/charts.js"></script>
-<script src="js/calendar.js"></script>
-<script src="js/ui.js"></script>
-<script src="js/book.js"></script>
-<script src="js/app.js"></script>
+<!-- TÜM script'ler NORMAL olarak yüklenir (module yok!) -->
+<script src="js/01-state.js"></script>
+<script src="js/02-utils.js"></script>
+<script src="js/03-google-books-api.js"></script>
+<script src="js/04-author-autocomplete.js"></script>
+<script src="js/05-book-search.js"></script>
+<script src="js/06-continue-reading.js"></script>
+<script src="js/07-start-book-modal.js"></script>
+<script src="js/08-book-crud.js"></script>
+<script src="js/09-averages.js"></script>
+<script src="js/10-book-list.js"></script>
+<script src="js/11-book-detail.js"></script>
+<script src="js/12-page-save.js"></script>
+<script src="js/13-charts.js"></script>
+<script src="js/14-calendar.js"></script>
+<script src="js/15-profile.js"></script>
+<script src="js/16-finished-book.js"></script>
+<script src="js/17-tabs.js"></script>
+<script src="js/18-main.js"></script>
 </body>
 </html>

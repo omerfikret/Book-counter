@@ -1,0 +1,29 @@
+/* ============================================================
+   AUTHOR AUTOCOMPLETE
+   ============================================================ */
+        .author-input-wrap { position: relative; }
+        .author-suggestions {
+            position: absolute;
+            top: calc(100% + 6px);
+            left: 0; right: 0;
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-md);
+            z-index: 500;
+            overflow: hidden;
+            display: none;
+        }
+        .author-suggestions.visible { display: block; }
+        .author-suggestion-item {
+            padding: 12px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.12s;
+        }
+        .author-suggestion-item:last-child { border-bottom: none; }
+        .author-suggestion-item:active,
+        .author-suggestion-item:hover { background: var(--accent-light); }

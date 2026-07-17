@@ -1,0 +1,51 @@
+/* ============================================================
+   FORMS & BUTTONS
+   ============================================================ */
+        .form-group { margin-bottom: 14px; }
+        .form-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-light);
+            margin-bottom: 6px;
+            display: block;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1.5px solid var(--border);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            font-family: inherit;
+            font-size: 15px;
+            transition: var(--transition);
+            color: var(--text);
+            -webkit-appearance: none;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: var(--surface);
+        }
+
+        .btn {
+            padding: 11px 18px;
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+            font-family: inherit;
+        }
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+        .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
+        .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
+        .btn-outline:active { background: var(--accent-light); }
+        .btn-sm { padding: 8px 14px; font-size: 13px; }

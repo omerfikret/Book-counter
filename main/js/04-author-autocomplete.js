@@ -1,5 +1,8 @@
 'use strict';
 
+/* ════════════════════════════════════════════════════════════
+   4. YAZAR AUTOCOMPLETE
+════════════════════════════════════════════════════════════ */
 let authorDebounceTimer = null;
 let authorSuggestionsVisible = false;
 
@@ -107,3 +110,4 @@ function hideAuthorSuggestions() {
     const box = document.getElementById('author-suggestions');
     if (box) { box.classList.remove('visible'); authorSuggestionsVisible = false; }
 }
+

@@ -1,0 +1,39 @@
+/* ============================================================
+   CARDS, METRICS & BADGES
+   ============================================================ */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 18px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow);
+        }
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--muted);
+            letter-spacing: 0.6px;
+            margin-bottom: 14px;
+        }
+
+        .flex-row { display: flex; gap: 10px; align-items: center; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+
+        .metric {
+            background: var(--surface-secondary);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 14px 6px;
+            text-align: center;
+        }
+        .metric-val { font-size: 26px; font-weight: 700; color: var(--accent); }
+        .metric-lbl { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+        .progress-bar-wrap { background: var(--border); border-radius: var(--radius-pill); height: 8px; overflow: hidden; margin-top: 10px; }
+        .progress-bar-fill { height: 100%; background: var(--accent); border-radius: var(--radius-pill); transition: width 0.25s ease; }
+
+        .badge { display: inline-block; padding: 4px 12px; border-radius: var(--radius-pill); font-size: 11px; font-weight: 500; }
+        .badge-green  { background: var(--success-light); color: var(--success); }
+        .badge-orange { background: var(--warning-light); color: var(--warning); }
+        .badge-blue   { background: var(--accent2-light); color: var(--accent2); }

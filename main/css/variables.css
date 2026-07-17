@@ -1,0 +1,86 @@
+/* ============================================================
+   VARIABLES & GLOBAL RESET
+   ============================================================ */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        :root {
+            /* Paper / ink palette — calmer, less yellow than before */
+            --bg: #F7F5F1;
+            --surface: #FFFFFF;
+            --surface-secondary: #FBFAF7;
+            --border: #E8E3D9;
+            --text: #262421;
+            --text-light: #58554E;
+            --muted: #928D84;
+
+            /* Warm accent, dialed back from a saturated orange to a calmer clay tone */
+            --accent: #A9663D;
+            --accent-light: #F5EBDF;
+            --accent-dark: #7C4A28;
+
+            /* Secondary accent — muted sage, used sparingly so the whole UI isn't one color */
+            --accent2: #6E7D68;
+            --accent2-light: #EAEEE7;
+
+            --success: #2E7D5B;
+            --success-light: #E6F2EC;
+            --warning: #C17A2E;
+            --warning-light: #FBEEE0;
+            --danger: #B23B2E;
+            --danger-light: #FBEAE7;
+
+            /* Unified corner-radius scale */
+            --radius-sm: 10px;
+            --radius: 16px;
+            --radius-lg: 22px;
+            --radius-pill: 999px;
+
+            /* Softer, shallower shadows — less "card floating in space" heaviness */
+            --shadow: 0 1px 2px rgba(38, 36, 33, 0.04), 0 1px 3px rgba(38, 36, 33, 0.05);
+            --shadow-md: 0 8px 24px rgba(38, 36, 33, 0.09);
+
+            --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+
+            /* Clean UI sans for body copy, restrained serif reserved for the app title only */
+            --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            --font-display: 'Iowan Old Style', 'Georgia', serif;
+        }
+
+        /* Dark mode — for evening reading sessions, keeps the same warm character */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1B1917;
+                --surface: #242220;
+                --surface-secondary: #2A2825;
+                --border: #383430;
+                --text: #EDE9E2;
+                --text-light: #C7C1B7;
+                --muted: #8C877E;
+
+                --accent: #D89361;
+                --accent-light: #362A20;
+                --accent-dark: #F0B182;
+
+                --accent2: #9AAB93;
+                --accent2-light: #262B24;
+
+                --success: #6FBF98;
+                --success-light: #1E2F27;
+                --warning: #E0A05E;
+                --warning-light: #332617;
+                --danger: #E08277;
+                --danger-light: #332120;
+
+                --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.2);
+                --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+            }
+        }
+
+        /* Respect reduced-motion preferences */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }

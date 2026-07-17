@@ -1,7 +1,10 @@
 'use strict';
 
-const TR_MONTHS_LONG = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+/* ════════════════════════════════════════════════════════════
+   14. TAKVİM
+════════════════════════════════════════════════════════════ */
 const calState = {};
+const TR_MONTHS_LONG = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
 
 function renderCalendar(bookId, year, month) {
     calState[bookId] = { year, month };
@@ -41,3 +44,4 @@ window.calNav = function(bookId, dir) {
     if (month > 11) { month = 0;  year++; }
     renderCalendar(bookId, year, month);
 };
+

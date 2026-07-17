@@ -1,5 +1,8 @@
 'use strict';
 
+/* ════════════════════════════════════════════════════════════
+   2. YARDIMCILAR
+════════════════════════════════════════════════════════════ */
 function genId() {
     return 'book_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
 }
@@ -52,3 +55,4 @@ function setLoading(btnTxtId, loaderId, btnId, isLoading) {
     if (loader)  loader.style.display  = isLoading ? 'inline-block' : 'none';
     if (btn)     btn.disabled          = isLoading;
 }
+

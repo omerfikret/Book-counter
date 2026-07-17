@@ -1,7 +1,8 @@
 'use strict';
 
-let weeklyChart = null, monthlyChart = null;
-
+/* ════════════════════════════════════════════════════════════
+   13. GRAFİKLER
+════════════════════════════════════════════════════════════ */
 function renderBookChart(bookId) {
     const book   = STATE.books.find(b => b.id === bookId);
     const canvas = document.getElementById(`weekly-chart-${bookId}`);
@@ -46,6 +47,8 @@ function renderBookChart(bookId) {
         avgDiv.textContent = `Bu hafta: ${weekTotal} sayfa | Ort: ${avg} sayfa/gün (${readDays} gün)`;
     }
 }
+
+let weeklyChart = null, monthlyChart = null;
 
 function renderProfileCharts() {
     const weeklyData = {};
@@ -105,3 +108,4 @@ function renderProfileCharts() {
         });
     }
 }
+

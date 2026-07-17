@@ -1,12 +1,10 @@
 'use strict';
 
-let foundEditions = [];
+/* ════════════════════════════════════════════════════════════
+   5. KİTAP ARAMA & BASKILI SEÇİM
+════════════════════════════════════════════════════════════ */
+let foundEditions     = [];
 let selectedEditionIdx = -1;
-
-function langLabel(code) {
-    const map = { tr:'Türkçe', en:'İngilizce', de:'Almanca', fr:'Fransızca', es:'İspanyolca', it:'İtalyanca', ru:'Rusça', ja:'Japonca', ar:'Arapça' };
-    return map[code] || (code ? code.toUpperCase() : '');
-}
 
 async function searchBook() {
     const title = (document.getElementById('new-book-title').value || '').trim();
@@ -82,3 +80,9 @@ function showEditionSection(editions) {
         }
     };
 }
+
+function langLabel(code) {
+    const map = { tr:'Türkçe', en:'İngilizce', de:'Almanca', fr:'Fransızca', es:'İspanyolca', it:'İtalyanca', ru:'Rusça', ja:'Japonca', ar:'Arapça' };
+    return map[code] || (code ? code.toUpperCase() : '');
+}
+
