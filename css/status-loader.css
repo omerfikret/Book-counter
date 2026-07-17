@@ -1,9 +1,0 @@
-/* ============================================================
-   STATUS MESSAGES & LOADER
-   ============================================================ */
-        .status-msg { font-size: 12px; padding: 5px 0; color: var(--muted); min-height: 22px; }
-        .status-msg.ok  { color: var(--success); }
-        .status-msg.err { color: var(--danger); }
-
-        .loader { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
