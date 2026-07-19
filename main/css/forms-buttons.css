@@ -41,10 +41,14 @@
             justify-content: center;
             font-family: inherit;
         }
+        .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
         .btn-primary {
             background: var(--accent);
             color: white;
+            box-shadow: var(--shadow-ribbon);
         }
+        .btn-primary:hover { background: var(--accent-dark); }
         .btn-primary:active { transform: scale(0.97); opacity: 0.9; }
         .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
         .btn-outline:active { background: var(--accent-light); }

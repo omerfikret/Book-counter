@@ -12,7 +12,8 @@ function recalcAverages(book) {
     }
     book.weeklyAvgs = {};
     for (const [wk, arr] of Object.entries(weekBuckets)) {
-        book.weeklyAvgs[wk] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+        const total = arr.reduce((a, b) => a + b, 0);
+        book.weeklyAvgs[wk] = Math.round(total / 7);
     }
 
     const monthBuckets = {};
@@ -31,4 +32,3 @@ function recalcAverages(book) {
         book.monthlyAvgs[mk] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
     }
 }
-

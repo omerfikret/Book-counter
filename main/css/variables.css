@@ -1,33 +1,38 @@
 /* ============================================================
-   VARIABLES & GLOBAL RESET
+   VARIABLES & GLOBAL RESET — "Ex Libris" design system
    ============================================================ */
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&display=swap');
+
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         :root {
-            /* Paper / ink palette — calmer, less yellow than before */
-            --bg: #F7F5F1;
+            /* Linen paper — cooler & greyer than a stock "cream", less generic */
+            --bg: #F3F0E8;
             --surface: #FFFFFF;
-            --surface-secondary: #FBFAF7;
-            --border: #E8E3D9;
-            --text: #262421;
-            --text-light: #58554E;
-            --muted: #928D84;
+            --surface-secondary: #FAF8F2;
+            --border: #E4DECE;
+            --text: #262320;
+            --text-light: #57534A;
+            --muted: #948C7E;
 
-            /* Warm accent, dialed back from a saturated orange to a calmer clay tone */
-            --accent: #A9663D;
-            --accent-light: #F5EBDF;
-            --accent-dark: #7C4A28;
+            /* Primary accent — oxblood ribbon (bookmark red). Reserved for brand +
+               interactive elements: buttons, links, focus, "today". */
+            --accent: #8C3F35;
+            --accent-light: #F1E1DC;
+            --accent-dark: #672D26;
 
-            /* Secondary accent — muted sage, used sparingly so the whole UI isn't one color */
-            --accent2: #6E7D68;
-            --accent2-light: #EAEEE7;
+            /* Secondary accent — deep moss. Reserved for "reading activity" signals:
+               logged days, progress, completed states. Keeping this separate from
+               --accent stops one color doing every job in the UI. */
+            --accent2: #4F6B4F;
+            --accent2-light: #E4EAE0;
 
-            --success: #2E7D5B;
-            --success-light: #E6F2EC;
-            --warning: #C17A2E;
-            --warning-light: #FBEEE0;
-            --danger: #B23B2E;
-            --danger-light: #FBEAE7;
+            --success: #3E7C5A;
+            --success-light: #E5F1EA;
+            --warning: #B8842E;
+            --warning-light: #FAF0DC;
+            --danger: #C0392B;
+            --danger-light: #FCE8E5;
 
             /* Unified corner-radius scale */
             --radius-sm: 10px;
@@ -35,34 +40,38 @@
             --radius-lg: 22px;
             --radius-pill: 999px;
 
-            /* Softer, shallower shadows — less "card floating in space" heaviness */
-            --shadow: 0 1px 2px rgba(38, 36, 33, 0.04), 0 1px 3px rgba(38, 36, 33, 0.05);
-            --shadow-md: 0 8px 24px rgba(38, 36, 33, 0.09);
+            /* Ink-tinted shadows, plus a colored "ribbon" shadow for primary actions */
+            --shadow: 0 1px 2px rgba(38, 35, 32, 0.04), 0 1px 3px rgba(38, 35, 32, 0.05);
+            --shadow-md: 0 8px 24px rgba(38, 35, 32, 0.10);
+            --shadow-ribbon: 0 6px 16px rgba(140, 63, 53, 0.28);
 
             --transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 
-            /* Clean UI sans for body copy, restrained serif reserved for the app title only */
+            /* Fraunces: a literary variable serif with real character for display use;
+               kept restrained to headings/numbers. System sans stays fast & native for body copy. */
             --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            --font-display: 'Iowan Old Style', 'Georgia', serif;
+            --font-display: 'Fraunces', 'Iowan Old Style', Georgia, serif;
         }
 
-        /* Dark mode — for evening reading sessions, keeps the same warm character */
+        /* Dark mode — same "Ex Libris" identity, tuned for low-light reading.
+           Applies automatically from the OS preference, AND can be forced
+           either way with <html data-theme="dark|light"> via theme-toggle.js. */
         @media (prefers-color-scheme: dark) {
-            :root {
-                --bg: #1B1917;
-                --surface: #242220;
-                --surface-secondary: #2A2825;
-                --border: #383430;
-                --text: #EDE9E2;
-                --text-light: #C7C1B7;
-                --muted: #8C877E;
+            :root:not([data-theme="light"]) {
+                --bg: #1A1815;
+                --surface: #221F1B;
+                --surface-secondary: #282520;
+                --border: #3A362F;
+                --text: #EDE8DE;
+                --text-light: #C7C0B2;
+                --muted: #8C8577;
 
-                --accent: #D89361;
-                --accent-light: #362A20;
-                --accent-dark: #F0B182;
+                --accent: #D68A78;
+                --accent-light: #3A2620;
+                --accent-dark: #F0AC9A;
 
-                --accent2: #9AAB93;
-                --accent2-light: #262B24;
+                --accent2: #8FAE87;
+                --accent2-light: #24291F;
 
                 --success: #6FBF98;
                 --success-light: #1E2F27;
@@ -73,7 +82,74 @@
 
                 --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.2);
                 --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+                --shadow-ribbon: 0 6px 18px rgba(214, 138, 120, 0.25);
             }
+        }
+
+        /* Explicit override: user picked dark mode from the in-app toggle,
+           regardless of what the OS is set to. */
+        :root[data-theme="dark"] {
+            --bg: #1A1815;
+            --surface: #221F1B;
+            --surface-secondary: #282520;
+            --border: #3A362F;
+            --text: #EDE8DE;
+            --text-light: #C7C0B2;
+            --muted: #8C8577;
+
+            --accent: #D68A78;
+            --accent-light: #3A2620;
+            --accent-dark: #F0AC9A;
+
+            --accent2: #8FAE87;
+            --accent2-light: #24291F;
+
+            --success: #6FBF98;
+            --success-light: #1E2F27;
+            --warning: #E0A05E;
+            --warning-light: #332617;
+            --danger: #E08277;
+            --danger-light: #332120;
+
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 1px 3px rgba(0, 0, 0, 0.2);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+            --shadow-ribbon: 0 6px 18px rgba(214, 138, 120, 0.25);
+        }
+
+        /* Explicit override: user picked light mode from the in-app toggle,
+           regardless of what the OS is set to. Restates the :root defaults
+           so it wins over the OS-driven dark media query above. */
+        :root[data-theme="light"] {
+            --bg: #F3F0E8;
+            --surface: #FFFFFF;
+            --surface-secondary: #FAF8F2;
+            --border: #E4DECE;
+            --text: #262320;
+            --text-light: #57534A;
+            --muted: #948C7E;
+
+            --accent: #8C3F35;
+            --accent-light: #F1E1DC;
+            --accent-dark: #672D26;
+
+            --accent2: #4F6B4F;
+            --accent2-light: #E4EAE0;
+
+            --success: #3E7C5A;
+            --success-light: #E5F1EA;
+            --warning: #B8842E;
+            --warning-light: #FAF0DC;
+            --danger: #C0392B;
+            --danger-light: #FCE8E5;
+
+            --shadow: 0 1px 2px rgba(38, 35, 32, 0.04), 0 1px 3px rgba(38, 35, 32, 0.05);
+            --shadow-md: 0 8px 24px rgba(38, 35, 32, 0.10);
+            --shadow-ribbon: 0 6px 16px rgba(140, 63, 53, 0.28);
+        }
+
+        /* Smooth, non-jarring theme swap */
+        body, .card, .header, .bottom-tab-bar, .modal-card, input, select, textarea {
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
         }
 
         /* Respect reduced-motion preferences */

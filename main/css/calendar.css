@@ -12,8 +12,22 @@
             border-radius: 50%;
             background: var(--bg);
             color: var(--text);
-            transition: var(--transition);
+            transition: var(--transition), transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
-        .cal-cell.has-read { background: var(--accent-light); color: var(--accent-dark); font-weight: 600; }
-        .cal-cell.today { border: 2px solid var(--accent); font-weight: 700; }
+        @media (hover: hover) {
+            .cal-cell:not(.empty):hover { transform: scale(1.12); }
+        }
+        .cal-cell.has-read {
+            background: var(--accent2-light);
+            color: var(--accent2);
+            font-weight: 600;
+            animation: calPop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .cal-cell.today {
+            border: 2px solid var(--accent);
+            font-weight: 700;
+            animation: calRing 0.4s ease-out both;
+        }
         .cal-cell.empty { background: transparent; }
+        @keyframes calPop { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
+        @keyframes calRing { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
