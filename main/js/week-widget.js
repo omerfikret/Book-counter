@@ -41,7 +41,6 @@ function renderWeekWidget() {
 
     const avgEl    = document.getElementById('week-avg');
     const totalEl  = document.getElementById('week-total');
-    const activeEl = document.getElementById('week-active');
     if (avgEl)    avgEl.textContent    = Math.round(totalPages / 7);
     if (totalEl)  totalEl.textContent  = totalPages;
     if (activeEl) activeEl.textContent = STATE.books.length;

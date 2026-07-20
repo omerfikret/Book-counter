@@ -34,8 +34,6 @@ function renderBookDetail(book) {
                     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
                         <span class="badge badge-green">${escapeHtml(book.genre)}</span>
                         ${book.totalPages ? `<span class="badge badge-orange">${book.totalPages} sayfa</span>` : ''}
-                        <span class="badge badge-blue">%${pct}</span>
-                        ${book.startPage > 0 ? `<span class="badge" style="background:var(--accent2-light);color:var(--accent2)">📑 ${book.startPage}. sayfadan</span>` : ''}
                     </div>
                 </div>
                 <button onclick="deleteBook('${book.id}')"

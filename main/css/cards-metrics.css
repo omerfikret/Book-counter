@@ -22,7 +22,7 @@
         }
 
         .flex-row { display: flex; gap: 10px; align-items: center; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(0, 1fr)); gap: 10px; }
 
         .metric {
             background: var(--surface-secondary);

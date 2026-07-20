@@ -44,7 +44,7 @@ function renderBookChart(bookId) {
         const weekTotal = data.reduce((a, b) => a + b, 0);
         const readDays  = data.filter(v => v > 0).length;
         const avg       = readDays > 0 ? Math.round(weekTotal / readDays) : 0;
-        avgDiv.textContent = `Bu hafta: ${weekTotal} sayfa | Ort: ${avg} sayfa/gün (${readDays} gün)`;
+        avgDiv.textContent = `Bu hafta: ${weekTotal} sayfa`;
     }
 }
 
