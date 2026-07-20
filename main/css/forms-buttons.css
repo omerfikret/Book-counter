@@ -16,7 +16,7 @@
             border-radius: var(--radius-sm);
             background: var(--bg);
             font-family: inherit;
-            font-size: 15px;
+            font-size: 16px;
             transition: var(--transition);
             color: var(--text);
             -webkit-appearance: none;
@@ -40,6 +40,8 @@
             gap: 6px;
             justify-content: center;
             font-family: inherit;
+            min-height: 44px;   
+            min-width: 44px; 
         }
         .btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
@@ -53,3 +55,17 @@
         .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
         .btn-outline:active { background: var(--accent-light); }
         .btn-sm { padding: 8px 14px; font-size: 13px; }
+
+        /* ============================================================
+   TOUCH ACTION - Mobil Zoom Engelleme
+   ============================================================ */
+button,
+input,
+select,
+textarea,
+a,
+.btn,
+.metric,
+[role="button"] {
+  touch-action: manipulation;
+}
