@@ -4,6 +4,11 @@
    9. ORTALAMA HESAPLAMA
 ════════════════════════════════════════════════════════════ */
 function recalcAverages(book) {
+    // İçinde bulunulan hafta henüz tamamlanmadığı için sabit /7 yerine
+    // o haftadan bugüne kadar geçen gün sayısına bölünmeli.
+    const todayWeekKey = getWeekNumber(new Date().toISOString().slice(0, 10));
+    const todayDow      = new Date().getDay() || 7; // Pzt=1 ... Paz=7
+
     const weekBuckets = {};
     for (const [date, pages] of Object.entries(book.readLog)) {
         const wk = getWeekNumber(date);
@@ -12,23 +17,28 @@ function recalcAverages(book) {
     }
     book.weeklyAvgs = {};
     for (const [wk, arr] of Object.entries(weekBuckets)) {
-        const total = arr.reduce((a, b) => a + b, 0);
-        book.weeklyAvgs[wk] = Math.round(total / 7);
+        const total   = arr.reduce((a, b) => a + b, 0);
+        const divisor = (wk === todayWeekKey) ? todayDow : 7;
+        book.weeklyAvgs[wk] = Math.round(total / divisor);
     }
 
-    const monthBuckets = {};
-    for (const [wk, avg] of Object.entries(book.weeklyAvgs)) {
-        const [y, w] = wk.split('-W');
-        const jan4   = new Date(parseInt(y), 0, 4);
-        const mon    = new Date(jan4);
-        mon.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1));
-        mon.setDate(mon.getDate() + (parseInt(w) - 1) * 7);
-        const mk = getMonthKey(mon.toISOString().slice(0, 10));
-        if (!monthBuckets[mk]) monthBuckets[mk] = [];
-        monthBuckets[mk].push(avg);
+    // Aylık ortalama, haftalık ortalamaların ortalaması olarak değil (çift katmanlı
+    // yuvarlama/ağırlık hatasına yol açıyordu), doğrudan o aydaki toplam sayfa /
+    // o aydaki gün sayısı olarak hesaplanır. Ay henüz bitmediyse bugüne kadarki
+    // gün sayısına bölünür.
+    const todayMonthKey = getMonthKey(new Date().toISOString().slice(0, 10));
+    const todayDate     = new Date().getDate();
+
+    const monthTotals = {};
+    for (const [date, pages] of Object.entries(book.readLog)) {
+        const mk = getMonthKey(date);
+        monthTotals[mk] = (monthTotals[mk] || 0) + pages;
     }
     book.monthlyAvgs = {};
-    for (const [mk, arr] of Object.entries(monthBuckets)) {
-        book.monthlyAvgs[mk] = Math.round(arr.reduce((a, b) => a + b, 0) / arr.length);
+    for (const [mk, total] of Object.entries(monthTotals)) {
+        const [y, m]      = mk.split('-').map(Number);
+        const daysInMonth = new Date(y, m, 0).getDate();
+        const divisor      = (mk === todayMonthKey) ? todayDate : daysInMonth;
+        book.monthlyAvgs[mk] = Math.round(total / divisor);
     }
 }

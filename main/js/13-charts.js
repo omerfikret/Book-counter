@@ -42,25 +42,31 @@ function renderBookChart(bookId) {
     const avgDiv = document.getElementById(`week-avg-${bookId}`);
     if (avgDiv) {
         const weekTotal = data.reduce((a, b) => a + b, 0);
-        const readDays  = data.filter(v => v > 0).length;
-        const avg       = readDays > 0 ? Math.round(weekTotal / readDays) : 0;
-        avgDiv.textContent = `Bu hafta: ${weekTotal} sayfa`;
+        // Hafta henüz bitmediyse ortalamayı 7'ye değil, bugüne kadar geçen gün sayısına göre al
+        const todayDow  = today.getDay() || 7;
+        const avg       = Math.round(weekTotal / todayDow);
+        avgDiv.textContent = `Bu hafta: ${weekTotal} sayfa · Ortalama: ${avg} sayfa/gün`;
     }
 }
 
 let weeklyChart = null, monthlyChart = null;
 
 function renderProfileCharts() {
-    const weeklyData = {};
+    // Tüm kitaplardaki sayfaları hafta bazında topla (kayıt sayısına değil, gün sayısına bölünecek)
+    const weeklyData   = {};
+    const todayWeekKey = getWeekNumber(new Date().toISOString().slice(0, 10));
+    const todayDow      = new Date().getDay() || 7;
     STATE.books.forEach(b => {
         Object.entries(b.readLog).forEach(([date, pages]) => {
             const wk = getWeekNumber(date);
-            if (!weeklyData[wk]) weeklyData[wk] = [];
-            weeklyData[wk].push(pages);
+            weeklyData[wk] = (weeklyData[wk] || 0) + pages;
         });
     });
     const weeks  = Object.keys(weeklyData).sort();
-    const wData  = weeks.map(w => Math.round(weeklyData[w].reduce((a, b) => a + b, 0) / weeklyData[w].length));
+    const wData  = weeks.map(w => {
+        const divisor = (w === todayWeekKey) ? todayDow : 7;
+        return Math.round(weeklyData[w] / divisor);
+    });
 
     if (weeklyChart) weeklyChart.destroy();
     const wCanvas = document.getElementById('chart-weekly');
@@ -84,16 +90,26 @@ function renderProfileCharts() {
         });
     }
 
-    const monthlyData = {};
+    // Tüm kitaplardaki sayfaları ay bazında topla; bölen (ay içi gün sayısı) her
+    // kitap için ortak olduğundan, kitap ortalamalarını ayrı ayrı alıp tekrar
+    // ortalamak yerine tek bir toplam/bölen hesabı yapılır (ağırlıksız ortalama hatasını önler).
+    const monthlyData   = {};
+    const todayMonthKey = getMonthKey(new Date().toISOString().slice(0, 10));
+    const todayDate     = new Date().getDate();
     STATE.books.forEach(b => {
-        Object.entries(b.monthlyAvgs || {}).forEach(([mk, avg]) => {
-            if (!monthlyData[mk]) monthlyData[mk] = [];
-            monthlyData[mk].push(avg);
+        Object.entries(b.readLog).forEach(([date, pages]) => {
+            const mk = getMonthKey(date);
+            monthlyData[mk] = (monthlyData[mk] || 0) + pages;
         });
     });
     const months = Object.keys(monthlyData).sort();
     const TR_M   = ['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
-    const mData  = months.map(mk => Math.round(monthlyData[mk].reduce((a, b) => a + b, 0) / monthlyData[mk].length));
+    const mData  = months.map(mk => {
+        const [y, m]      = mk.split('-').map(Number);
+        const daysInMonth = new Date(y, m, 0).getDate();
+        const divisor      = (mk === todayMonthKey) ? todayDate : daysInMonth;
+        return Math.round(monthlyData[mk] / divisor);
+    });
 
     if (monthlyChart) monthlyChart.destroy();
     const mCanvas = document.getElementById('chart-monthly');
@@ -108,4 +124,3 @@ function renderProfileCharts() {
         });
     }
 }
-
